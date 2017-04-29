@@ -1,0 +1,11 @@
+{
+    "plugins": [
+        [
+            "relay"
+        ]
+    ],
+    "presets": [
+        "flow",
+        "react-native"
+    ]
+}
