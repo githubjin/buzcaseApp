@@ -1,5 +1,12 @@
 import React from "react";
-import { Text, View, ScrollView, StyleSheet, Animated } from "react-native";
+import {
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  Animated,
+  TouchableOpacity
+} from "react-native";
 const {
   graphql,
   QueryRenderer,
@@ -101,10 +108,15 @@ class Detail extends React.Component {
       scrollTop: new Animated.Value(0)
     };
   }
+  editIt = (id: string) => {
+    return () => {
+      this.props.navigation.navigate("Add", { id });
+    };
+  };
   render() {
-    console.log(
-      "detail renderdetail renderdetail renderdetail renderdetail render "
-    );
+    // console.log(
+    //   "detail renderdetail renderdetail renderdetail renderdetail render "
+    // );
     const {
       node: {
         marriage,
@@ -120,7 +132,8 @@ class Detail extends React.Component {
         children,
         events,
         notes,
-        createdAt
+        createdAt,
+        id
       }
     } = this.props;
     return (
@@ -158,9 +171,11 @@ class Detail extends React.Component {
               {title}
             </ArticleDetailTitle>
           </ScrollView>
-          <View style={styles.edit}>
-            <Icon size={normalize(20)} name="ios-create" color="#ffffff" />
-          </View>
+          <TouchableOpacity onPress={this.editIt(id)}>
+            <View style={styles.edit}>
+              <Icon size={normalize(20)} name="ios-create" color="#ffffff" />
+            </View>
+          </TouchableOpacity>
         </Animated.View>
         <PageContainer
           onScroll={({ nativeEvent }) =>
@@ -182,9 +197,11 @@ class Detail extends React.Component {
                 {title}
               </ArticleDetailTitle>
             </ScrollView>
-            <View style={styles.edit}>
-              <Icon size={normalize(20)} name="ios-create" color="#ffffff" />
-            </View>
+            <TouchableOpacity onPress={this.editIt(id)}>
+              <View style={styles.edit}>
+                <Icon size={normalize(20)} name="ios-create" color="#ffffff" />
+              </View>
+            </TouchableOpacity>
           </Header>
           <View style={styles._content}>
             <View style={styles.card}>
@@ -257,7 +274,7 @@ const Container = createFragmentContainer(Detail, {
       jobs,
       marriage,
       children,
-      events {
+      events(first: 10) @connection(key: "article_events") {
         edges {
           node {
             id,
@@ -267,7 +284,7 @@ const Container = createFragmentContainer(Detail, {
         }
       },
       knowledge,
-      notes {
+      notes(first: 10) @connection(key: "article_notes") {
         edges {
           node {
             id,

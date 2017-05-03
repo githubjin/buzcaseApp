@@ -4,7 +4,7 @@ import styled from "styled-components/native";
 import {
   Platform,
   StyleSheet,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   PixelRatio,
   View,
   Text
@@ -82,7 +82,7 @@ export const NHeaderBackButton = props => {
 export const BackButton = props => {
   const { color, onBack, navigation, style } = props;
   return (
-    <TouchableWithoutFeedback
+    <TouchableOpacity
       onPress={() => {
         if (onBack) {
           onBack();
@@ -97,7 +97,7 @@ export const BackButton = props => {
         name="ios-arrow-back-outline"
         size={normalize(25)}
       />
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 };
 
@@ -140,6 +140,7 @@ export const Button = props => {
     buttonStyle,
     iconStyle,
     textStyle,
+    style,
     size = 20,
     iconColor = "#ffffff",
     icon,
@@ -147,7 +148,7 @@ export const Button = props => {
     onPress
   } = props;
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <TouchableOpacity onPress={onPress} style={style}>
       <View style={buttonStyle}>
         <Icon
           style={iconStyle}
@@ -157,6 +158,6 @@ export const Button = props => {
         />
         <Text style={textStyle}>{title}</Text>
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 };

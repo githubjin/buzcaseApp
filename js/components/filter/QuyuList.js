@@ -3,7 +3,7 @@ import React from "react";
 import {
   FlatList,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   View,
   StyleSheet,
   InteractionManager
@@ -16,7 +16,8 @@ export default class QuyuList extends React.PureComponent {
   props: {
     viewer: Object,
     level: string, // P | C | A
-    loadSub: (code: string) => void
+    loadSub: (code: string, selectedName: string) => void,
+    onSelected: (selectedName: string) => void
   };
   constructor(props) {
     super(props);
@@ -37,7 +38,12 @@ export default class QuyuList extends React.PureComponent {
       });
       if (this.props.loadSub) {
         InteractionManager.runAfterInteractions(() => {
-          this.props.loadSub(item.code);
+          this.props.loadSub(item.code, item.name);
+        });
+      }
+      if (this.props.onSelected) {
+        InteractionManager.runAfterInteractions(() => {
+          this.props.onSelected(item.name);
         });
       }
     };
@@ -47,10 +53,7 @@ export default class QuyuList extends React.PureComponent {
     let checked = this.state.seleted.id === node.id;
     // console.log("_renderItemComponent", checked);
     return (
-      <TouchableWithoutFeedback
-        key={node.id}
-        onPress={this.changeHandler(node)}
-      >
+      <TouchableOpacity key={node.id} onPress={this.changeHandler(node)}>
         <View
           style={{
             height: normalize(35),
@@ -73,7 +76,7 @@ export default class QuyuList extends React.PureComponent {
             {node.name}
           </DictItemText>
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
     );
   };
   _shouldItemUpdate = ({ item: prevItem = {} }, { item: nextItem = {} }) => {

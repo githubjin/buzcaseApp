@@ -18,7 +18,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 const { createFragmentContainer, graphql } = require("react-relay");
 import Home from "./components/tabs/Home";
-import Add from "./components/tabs/Add";
+import Add from "./components/tabs/edit/EditInit";
 import Setting from "./components/tabs/Setting";
 import Detail from "./components/detail/Detail";
 import Search from "./components/search/Search";
@@ -27,6 +27,9 @@ import SignUp from "./components/sign/signup";
 import DictionayManager from "./components/dictionary/DictionaryManager";
 import { CustomHeader } from "./components/common";
 import { dic_tab_font_size } from "./components/H8Size";
+import TextEditor from "./components/tabs/edit/TextEditor";
+import Selector from "./components/tabs/edit/Selector";
+import QuyuSelector from "./components/tabs/edit/QuyuSelector";
 
 const styles = StyleSheet.create({
   container: {
@@ -139,7 +142,8 @@ function getAppNavigator(initialRouteName: string) {
         screen: Detail,
         navigationOptions: {
           title: "案例详细信息",
-          header: null
+          header: null,
+          headerBackTitle: null
         }
       },
       Dictionary: {
@@ -157,8 +161,73 @@ function getAppNavigator(initialRouteName: string) {
       },
       Add: {
         screen: Add,
-        navigationOptions: {
-          title: "添加"
+        navigationOptions: ({ navigation }) => ({
+          title: "案例编辑",
+          headerBackTitle: null,
+          headerRight: (
+            <TouchableOpacity
+              onPress={navigation.state.params && navigation.state.params.save}
+            >
+              <Text style={{ color: "#666666", paddingRight: 12 }}>保存</Text>
+            </TouchableOpacity>
+          )
+        })
+      },
+      Selector: {
+        screen: Selector,
+        navigationOptions: ({ navigation }) => {
+          const { edited = false } = navigation.state.params;
+          return {
+            title: `编辑${navigation.state.params.title}`,
+            headerBackTitle: null,
+            headerRight: edited
+              ? <TouchableOpacity
+                  onPress={
+                    navigation.state.params && navigation.state.params.save
+                  }
+                >
+                  <Text style={{ color: "#666666", paddingRight: 12 }}>确定</Text>
+                </TouchableOpacity>
+              : null
+          };
+        }
+      },
+      QuyuSelector: {
+        screen: QuyuSelector,
+        navigationOptions: ({ navigation }) => {
+          const { edited = false } = navigation.state.params;
+          return {
+            title: `编辑${navigation.state.params.title}`,
+            headerBackTitle: null,
+            headerRight: edited
+              ? <TouchableOpacity
+                  onPress={
+                    navigation.state.params && navigation.state.params.save
+                  }
+                >
+                  <Text style={{ color: "#666666", paddingRight: 12 }}>确定</Text>
+                </TouchableOpacity>
+              : null
+          };
+        }
+      },
+      TextEditor: {
+        screen: TextEditor,
+        navigationOptions: ({ navigation }) => {
+          const { edited = false } = navigation.state.params;
+          return {
+            title: `编辑${navigation.state.params.title}`,
+            headerBackTitle: null,
+            headerRight: edited
+              ? <TouchableOpacity
+                  onPress={
+                    navigation.state.params && navigation.state.params.save
+                  }
+                >
+                  <Text style={{ color: "#666666", paddingRight: 12 }}>确定</Text>
+                </TouchableOpacity>
+              : null
+          };
         }
       },
       SignIn: {
@@ -184,7 +253,7 @@ function getAppNavigator(initialRouteName: string) {
 // export default AppNavigator;
 export default class AppNavigator extends PureComponent {
   render() {
-    // console.log(this.props.viewer);
+    console.log("this.props.viewer", this.props.viewer);
     const { viewer } = this.props;
     var initialRouteName = viewer && viewer.sessionToken ? "Root" : "SignIn";
     const AppNav = getAppNavigator(initialRouteName);

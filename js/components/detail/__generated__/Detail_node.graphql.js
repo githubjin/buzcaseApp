@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule Detail_node.graphql
- * @generated SignedSource<<de25f6a98803288368db7557b028dab1>>
+ * @generated SignedSource<<9832d97e4044bbae598feb363bb53576>>
  * @flow
  * @nogrep
  */
@@ -71,7 +71,26 @@ export type Detail_node_notes = {
 const fragment /*: ConcreteFragment*/ = {
   "argumentDefinitions": [],
   "kind": "Fragment",
-  "metadata": null,
+  "metadata": {
+    "connection": [
+      {
+        "count": null,
+        "cursor": null,
+        "direction": "forward",
+        "path": [
+          "events"
+        ]
+      },
+      {
+        "count": null,
+        "cursor": null,
+        "direction": "forward",
+        "path": [
+          "notes"
+        ]
+      }
+    ]
+  },
   "name": "Detail_node",
   "selections": [
     {
@@ -185,10 +204,10 @@ const fragment /*: ConcreteFragment*/ = {
     },
     {
       "kind": "LinkedField",
-      "alias": null,
+      "alias": "events",
       "args": null,
       "concreteType": "EventConnection",
-      "name": "events",
+      "name": "__article_events_connection",
       "plural": false,
       "selections": [
         {
@@ -246,10 +265,10 @@ const fragment /*: ConcreteFragment*/ = {
     },
     {
       "kind": "LinkedField",
-      "alias": null,
+      "alias": "notes",
       "args": null,
       "concreteType": "NoteConnection",
-      "name": "notes",
+      "name": "__article_notes_connection",
       "plural": false,
       "selections": [
         {

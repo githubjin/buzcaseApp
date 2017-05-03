@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule DetailQuery.graphql
- * @generated SignedSource<<72e7e0c22c721cf2b2fd68b73678b97b>>
- * @relayHash e2c3552790da97045bbeba068f04594a
+ * @generated SignedSource<<bad4c7f959410396c894e1174451a38a>>
+ * @relayHash 1cd3f7f0d70d580ecc4cdd04381eca76
  * @flow
  * @nogrep
  */
@@ -46,23 +46,39 @@ fragment Detail_node on Article {
   jobs
   marriage
   children
-  events {
+  events(first: 10) {
     edges {
       node {
         id
         text
         createdAt
+        __typename
       }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
     }
   }
   knowledge
-  notes {
+  notes(first: 10) {
     edges {
       node {
         id
         text
         createdAt
+        __typename
       }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
     }
   }
   createdAt
@@ -264,7 +280,14 @@ const batch /*: ConcreteBatch*/ = {
               {
                 "kind": "LinkedField",
                 "alias": null,
-                "args": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
                 "concreteType": "EventConnection",
                 "name": "events",
                 "plural": false,
@@ -305,15 +328,84 @@ const batch /*: ConcreteBatch*/ = {
                             "args": null,
                             "name": "createdAt",
                             "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "__typename",
+                            "storageKey": null
                           }
                         ],
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "cursor",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "PageInfo",
+                    "name": "pageInfo",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "endCursor",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasNextPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasPreviousPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "startCursor",
                         "storageKey": null
                       }
                     ],
                     "storageKey": null
                   }
                 ],
-                "storageKey": null
+                "storageKey": "events{\"first\":10}"
+              },
+              {
+                "kind": "LinkedHandle",
+                "alias": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
+                "handle": "connection",
+                "name": "events",
+                "key": "article_events",
+                "filters": null
               },
               {
                 "kind": "ScalarField",
@@ -325,7 +417,14 @@ const batch /*: ConcreteBatch*/ = {
               {
                 "kind": "LinkedField",
                 "alias": null,
-                "args": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
                 "concreteType": "NoteConnection",
                 "name": "notes",
                 "plural": false,
@@ -366,15 +465,84 @@ const batch /*: ConcreteBatch*/ = {
                             "args": null,
                             "name": "createdAt",
                             "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "__typename",
+                            "storageKey": null
                           }
                         ],
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "cursor",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "PageInfo",
+                    "name": "pageInfo",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "endCursor",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasNextPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasPreviousPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "startCursor",
                         "storageKey": null
                       }
                     ],
                     "storageKey": null
                   }
                 ],
-                "storageKey": null
+                "storageKey": "notes{\"first\":10}"
+              },
+              {
+                "kind": "LinkedHandle",
+                "alias": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
+                "handle": "connection",
+                "name": "notes",
+                "key": "article_notes",
+                "filters": null
               },
               {
                 "kind": "ScalarField",
@@ -390,7 +558,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query DetailQuery(\n  $articleId: ID!\n) {\n  node(id: $articleId) {\n    __typename\n    ...Detail_node\n    id\n  }\n}\n\nfragment Detail_node on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events {\n    edges {\n      node {\n        id\n        text\n        createdAt\n      }\n    }\n  }\n  knowledge\n  notes {\n    edges {\n      node {\n        id\n        text\n        createdAt\n      }\n    }\n  }\n  createdAt\n}\n"
+  "text": "query DetailQuery(\n  $articleId: ID!\n) {\n  node(id: $articleId) {\n    __typename\n    ...Detail_node\n    id\n  }\n}\n\nfragment Detail_node on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  notes(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  createdAt\n}\n"
 };
 
 module.exports = batch;

@@ -6,7 +6,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Button
 } from "react-native";
 const { graphql, QueryRenderer } = require("react-relay");
@@ -122,7 +122,8 @@ export default class SearchContainer extends React.PureComponent {
       >
         {histories.map((his, index) => {
           return (
-            <TouchableWithoutFeedback
+            <TouchableOpacity
+              style={{ width: "100%" }}
               onPress={this.queryWithHistory(his)}
               key={index}
             >
@@ -138,7 +139,7 @@ export default class SearchContainer extends React.PureComponent {
               >
                 <SearchItemText>{his}</SearchItemText>
               </View>
-            </TouchableWithoutFeedback>
+            </TouchableOpacity>
           );
         })}
         <View style={{ marginTop: normalize(20) }}>

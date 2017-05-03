@@ -4,7 +4,7 @@ import {
   View,
   SectionList,
   StyleSheet,
-  TouchableWithoutFeedback
+  TouchableOpacity
 } from "react-native";
 import _ from "lodash/lang";
 import moment from "moment";
@@ -73,12 +73,12 @@ class Search extends React.Component {
     return ({ item, index }) => {
       let isFirstOne = index === 0;
       return (
-        <TouchableWithoutFeedback onPress={this.showDetail(item.article)}>
+        <TouchableOpacity onPress={this.showDetail(item.article)}>
           <View style={[styles.item, isFirstOne ? {} : styles.itemAfter]}>
             <SearchItemText>{item[key]}</SearchItemText>
             <MetaText>{moment(item.createdAt).fromNow()}</MetaText>
           </View>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
       );
     };
   };

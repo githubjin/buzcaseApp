@@ -52,7 +52,7 @@ export default class AppSetup extends PureComponent {
                   sessionToken,
                   username,
                   email,
-                  emailVerified
+                  emailVerified,
                 }
             }`}
         render={({ error, props, rest }) => {

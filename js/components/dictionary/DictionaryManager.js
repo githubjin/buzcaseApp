@@ -5,7 +5,7 @@ import {
   StyleSheet,
   PixelRatio,
   ScrollView,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   TextInput,
   Animated,
   Keyboard,
@@ -219,6 +219,7 @@ class DictionaryManager extends React.PureComponent {
         </ScrollView>
         {!this.state.visible &&
           <Button
+            style={{ width: "100%" }}
             buttonStyle={styles.button}
             iconStyle={styles.icon}
             textStyle={styles.buttonText}
@@ -265,13 +266,13 @@ class DicItem extends React.PureComponent {
       <View style={styles.item} key={edge.node.id}>
         <Text style={{ fontSize: normalize(15) }}>{edge.node.name}</Text>
         {deletedable &&
-          <TouchableWithoutFeedback onPress={this._onPress}>
+          <TouchableOpacity onPress={this._onPress}>
             <Icon
               name="ios-trash-outline"
               size={normalize(20)}
               color="rgba(255,0,0,0.7)"
             />
-          </TouchableWithoutFeedback>}
+          </TouchableOpacity>}
       </View>
     );
   }
@@ -351,7 +352,8 @@ class AddForm extends React.PureComponent {
             justifyContent: "center",
             alignContent: "center",
             paddingHorizontal,
-            height: normalize(35)
+            height: normalize(35),
+            width: "100%"
           }}
         >
           <Icon
@@ -375,9 +377,10 @@ class AddForm extends React.PureComponent {
         </View>
         <View style={styles.buttonGroup}>
           <Button
+            style={{ width: "50%" }}
             buttonStyle={[
               styles.button,
-              { width: "50%", backgroundColor: "rgba(102,102,102,0.7)" }
+              { backgroundColor: "rgba(102,102,102,0.7)" }
             ]}
             iconStyle={styles.icon}
             textStyle={styles.buttonText}
@@ -388,7 +391,8 @@ class AddForm extends React.PureComponent {
             onPress={this.cancle}
           />
           <Button
-            buttonStyle={[styles.button, { width: "50%" }]}
+            style={{ width: "50%" }}
+            buttonStyle={[styles.button]}
             iconStyle={styles.icon}
             textStyle={styles.buttonText}
             size={20}
