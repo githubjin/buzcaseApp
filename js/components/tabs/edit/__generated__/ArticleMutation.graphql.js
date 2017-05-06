@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule ArticleMutation.graphql
- * @generated SignedSource<<967148c6fa19c6191db8b5cdcc4ecd24>>
- * @relayHash cd50eeb4b7198ef7f07af8e38692979d
+ * @generated SignedSource<<962131bad3e26f6bca5f3144424e196b>>
+ * @relayHash 83ae5f7b86b19f9a16dc49b07852972b
  * @flow
  * @nogrep
  */
@@ -32,13 +32,48 @@ export type ArticleMutationInput = {
 export type ArticleMutationResponse = {
   article?: ?ArticleMutationResponse_article;
   keys?: ?Array<?string>;
-  newEvents?: ?Array<?ArticleMutationResponse_newEvents>;
+  newEvents?: ?ArticleMutationResponse_newEvents;
   subEvents?: ?Array<?string>;
   updatedEvents?: ?Array<?ArticleMutationResponse_updatedEvents>;
 };
 
+export type ArticleMutationResponse_article_homePlace = {
+  province?: ?string;
+  city?: ?string;
+  area?: ?string;
+};
+
+export type ArticleMutationResponse_article_events_edges_node = {
+  id: string;
+  text?: ?string;
+  createdAt?: ?any;
+};
+
+export type ArticleMutationResponse_article_events_edges = {
+  node?: ?ArticleMutationResponse_article_events_edges_node;
+};
+
+export type ArticleMutationResponse_article_events = {
+  edges?: ?Array<?ArticleMutationResponse_article_events_edges>;
+};
+
 export type ArticleMutationResponse_article = {
   id: string;
+  attachments?: ?Array<?string>;
+  title?: ?string;
+  categories?: ?Array<?string>;
+  name?: ?string;
+  education?: ?string;
+  gender?: ?string;
+  birthday?: ?number;
+  homePlace?: ?ArticleMutationResponse_article_homePlace;
+  jobs?: ?Array<?string>;
+  marriage?: ?string;
+  children?: ?string;
+  events?: ?ArticleMutationResponse_article_events;
+  knowledge?: ?string;
+  createdAt?: ?any;
+  submit?: ?boolean;
 };
 
 export type ArticleMutationResponse_newEvents_node = {
@@ -47,6 +82,7 @@ export type ArticleMutationResponse_newEvents_node = {
 };
 
 export type ArticleMutationResponse_newEvents = {
+  cursor: string;
   node?: ?ArticleMutationResponse_newEvents_node;
 };
 
@@ -68,10 +104,46 @@ mutation ArticleMutation(
 ) {
   saveArticle(input: $input) {
     article {
+      homePlace {
+        province
+        city
+        area
+      }
       id
+      title
+      categories
+      name
+      education
+      gender
+      birthday
+      attachments
+      jobs
+      marriage
+      children
+      events(first: 10) {
+        edges {
+          node {
+            id
+            text
+            createdAt
+            __typename
+          }
+          cursor
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
+        }
+      }
+      knowledge
+      createdAt
+      submit
     }
     keys
     newEvents {
+      cursor
       node {
         id
         text
@@ -126,10 +198,187 @@ const batch /*: ConcreteBatch*/ = {
             "plural": false,
             "selections": [
               {
+                "kind": "LinkedField",
+                "alias": null,
+                "args": null,
+                "concreteType": "HomePlace",
+                "name": "homePlace",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "province",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "city",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "area",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
                 "kind": "ScalarField",
                 "alias": null,
                 "args": null,
                 "name": "id",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "title",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "categories",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "name",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "education",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "gender",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "birthday",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "attachments",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "jobs",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "marriage",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "children",
+                "storageKey": null
+              },
+              {
+                "kind": "LinkedField",
+                "alias": "events",
+                "args": null,
+                "concreteType": "EventConnection",
+                "name": "__article_events_connection",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "EventEdge",
+                    "name": "edges",
+                    "plural": true,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "Event",
+                        "name": "node",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "id",
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "text",
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "createdAt",
+                            "storageKey": null
+                          }
+                        ],
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "knowledge",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "createdAt",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "submit",
                 "storageKey": null
               }
             ],
@@ -148,8 +397,15 @@ const batch /*: ConcreteBatch*/ = {
             "args": null,
             "concreteType": "EventEdge",
             "name": "newEvents",
-            "plural": true,
+            "plural": false,
             "selections": [
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "cursor",
+                "storageKey": null
+              },
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -229,7 +485,20 @@ const batch /*: ConcreteBatch*/ = {
   },
   "id": null,
   "kind": "Batch",
-  "metadata": {},
+  "metadata": {
+    "connection": [
+      {
+        "count": null,
+        "cursor": null,
+        "direction": "forward",
+        "path": [
+          "saveArticle",
+          "article",
+          "events"
+        ]
+      }
+    ]
+  },
   "name": "ArticleMutation",
   "query": {
     "argumentDefinitions": [
@@ -271,7 +540,260 @@ const batch /*: ConcreteBatch*/ = {
                 "kind": "ScalarField",
                 "alias": null,
                 "args": null,
+                "name": "attachments",
+                "storageKey": null
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "args": null,
+                "concreteType": "HomePlace",
+                "name": "homePlace",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "province",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "city",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "area",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "title",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "categories",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "name",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "education",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "gender",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "birthday",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
                 "name": "id",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "jobs",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "marriage",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "children",
+                "storageKey": null
+              },
+              {
+                "kind": "LinkedField",
+                "alias": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
+                "concreteType": "EventConnection",
+                "name": "events",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "EventEdge",
+                    "name": "edges",
+                    "plural": true,
+                    "selections": [
+                      {
+                        "kind": "LinkedField",
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "Event",
+                        "name": "node",
+                        "plural": false,
+                        "selections": [
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "id",
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "text",
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "createdAt",
+                            "storageKey": null
+                          },
+                          {
+                            "kind": "ScalarField",
+                            "alias": null,
+                            "args": null,
+                            "name": "__typename",
+                            "storageKey": null
+                          }
+                        ],
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "cursor",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "PageInfo",
+                    "name": "pageInfo",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "endCursor",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasNextPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "hasPreviousPage",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "startCursor",
+                        "storageKey": null
+                      }
+                    ],
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": "events{\"first\":10}"
+              },
+              {
+                "kind": "LinkedHandle",
+                "alias": null,
+                "args": [
+                  {
+                    "kind": "Literal",
+                    "name": "first",
+                    "value": 10,
+                    "type": "Int"
+                  }
+                ],
+                "handle": "connection",
+                "name": "events",
+                "key": "article_events",
+                "filters": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "knowledge",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "createdAt",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "submit",
                 "storageKey": null
               }
             ],
@@ -290,8 +812,15 @@ const batch /*: ConcreteBatch*/ = {
             "args": null,
             "concreteType": "EventEdge",
             "name": "newEvents",
-            "plural": true,
+            "plural": false,
             "selections": [
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": null,
+                "name": "cursor",
+                "storageKey": null
+              },
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -368,7 +897,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "mutation ArticleMutation(\n  $input: ArticleMutationInput!\n) {\n  saveArticle(input: $input) {\n    article {\n      id\n    }\n    keys\n    newEvents {\n      node {\n        id\n        text\n      }\n    }\n    subEvents\n    updatedEvents {\n      node {\n        id\n        text\n      }\n    }\n  }\n}\n"
+  "text": "mutation ArticleMutation(\n  $input: ArticleMutationInput!\n) {\n  saveArticle(input: $input) {\n    article {\n      homePlace {\n        province\n        city\n        area\n      }\n      id\n      title\n      categories\n      name\n      education\n      gender\n      birthday\n      attachments\n      jobs\n      marriage\n      children\n      events(first: 10) {\n        edges {\n          node {\n            id\n            text\n            createdAt\n            __typename\n          }\n          cursor\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n        }\n      }\n      knowledge\n      createdAt\n      submit\n    }\n    keys\n    newEvents {\n      cursor\n      node {\n        id\n        text\n      }\n    }\n    subEvents\n    updatedEvents {\n      node {\n        id\n        text\n      }\n    }\n  }\n}\n"
 };
 
 module.exports = batch;

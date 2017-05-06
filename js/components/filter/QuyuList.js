@@ -17,7 +17,8 @@ export default class QuyuList extends React.PureComponent {
     viewer: Object,
     level: string, // P | C | A
     loadSub: (code: string, selectedName: string) => void,
-    onSelected: (selectedName: string) => void
+    onSelected: (selectedName: string) => void,
+    selected?: string
   };
   constructor(props) {
     super(props);
@@ -26,6 +27,15 @@ export default class QuyuList extends React.PureComponent {
       pre: {}
     };
   }
+  // componentWillReceiveProps(nextProps) {
+  //   // selected
+  //   if (nextProps.selected !== this.props.selected && !nextProps.selected) {
+  //     this.setState({
+  //       selected: {},
+  //       pre: {}
+  //     });
+  //   }
+  // }
   changeHandler = item => {
     return () => {
       if (this.state.seleted.id === item.id) {
@@ -97,7 +107,8 @@ export default class QuyuList extends React.PureComponent {
     // console.log(this.state.seleted.id, nextState.seleted.id);
     return (
       this.props.viewer !== nextProps.viewer ||
-      this.state.seleted.id !== nextState.seleted.id
+      this.state.seleted.id !== nextState.seleted.id ||
+      this.props.selected !== nextProps.selected
     );
   }
   render() {

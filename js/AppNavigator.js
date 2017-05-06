@@ -24,6 +24,7 @@ import Detail from "./components/detail/Detail";
 import Search from "./components/search/Search";
 import SignIn from "./components/sign/signin";
 import SignUp from "./components/sign/signup";
+import Drafts from "./components/drafts/DraftsPage";
 import DictionayManager from "./components/dictionary/DictionaryManager";
 import { CustomHeader } from "./components/common";
 import { dic_tab_font_size } from "./components/H8Size";
@@ -161,17 +162,22 @@ function getAppNavigator(initialRouteName: string) {
       },
       Add: {
         screen: Add,
-        navigationOptions: ({ navigation }) => ({
-          title: "案例编辑",
-          headerBackTitle: null,
-          headerRight: (
-            <TouchableOpacity
-              onPress={navigation.state.params && navigation.state.params.save}
-            >
-              <Text style={{ color: "#666666", paddingRight: 12 }}>保存</Text>
-            </TouchableOpacity>
-          )
-        })
+        navigationOptions: ({ navigation }) => {
+          const { edited = false } = navigation.state.params || {};
+          return {
+            title: "案例编辑",
+            headerBackTitle: null,
+            headerRight: edited
+              ? <TouchableOpacity
+                  onPress={
+                    navigation.state.params && navigation.state.params.save
+                  }
+                >
+                  <Text style={{ color: "#666666", paddingRight: 12 }}>保存</Text>
+                </TouchableOpacity>
+              : null
+          };
+        }
       },
       Selector: {
         screen: Selector,
@@ -190,6 +196,13 @@ function getAppNavigator(initialRouteName: string) {
                 </TouchableOpacity>
               : null
           };
+        }
+      },
+      Drafts: {
+        screen: Drafts,
+        navigationOptions: {
+          title: `草稿`,
+          headerBackTitle: null
         }
       },
       QuyuSelector: {

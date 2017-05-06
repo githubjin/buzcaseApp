@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule EditInit_viewer.graphql
- * @generated SignedSource<<2a0588cd028c4875161854fcd8f3a698>>
+ * @generated SignedSource<<c2e4287d7a02604771044e88e4f684d0>>
  * @flow
  * @nogrep
  */
@@ -13,6 +13,7 @@
 /*::
 import type {ConcreteFragment} from 'relay-runtime';
 export type EditInit_viewer = {
+  id: string;
   ossToken?: ?EditInit_viewer_ossToken;
 };
 
@@ -33,6 +34,13 @@ const fragment /*: ConcreteFragment*/ = {
   "metadata": null,
   "name": "EditInit_viewer",
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "args": null,
+      "name": "id",
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": null,

@@ -48,7 +48,7 @@ export default class DictBox extends React.PureComponent {
   props: {
     edges: Object[],
     title: string,
-    filter: (text: string, order: number) => () => {},
+    filter: (selected: string | string[], multiple: boolean) => () => {},
     multiple: boolean
   };
   shouldComponentUpdate(nextProps, nextState) {
@@ -81,7 +81,7 @@ export default class DictBox extends React.PureComponent {
       this.setState({
         selected: newSlected
       });
-      this.props.filter(text)();
+      this.props.filter(newSlected, multiple)();
     };
   };
   render() {

@@ -6,9 +6,10 @@ import {
   ScrollView,
   StyleSheet,
   Animated,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   InteractionManager
 } from "react-native";
+import Immutable from "immutable";
 import { DictItemText, DictItemTitle, normalize } from "../H8Text";
 import { selected_red } from "../H8Colors";
 import styled from "styled-components/native";
@@ -62,13 +63,22 @@ const Title = styled.View`
     margin-horizontal: 3;
 `;
 export default class Quyu extends React.PureComponent {
+  props: {
+    filter: (homePlace: {
+      province?: string,
+      city?: string,
+      area?: string
+    }) => void
+  };
   constructor(props) {
     super(props);
     this.state = {
       right: new Animated.Value(this.props.isOpen ? 0 : -getMaskWidth()),
       provinceCode: null,
       cityCode: null,
-      loaded: false
+      areaCode: null,
+      loaded: false,
+      homePlace: Immutable.Map({})
     };
   }
   componentWillReceiveProps(nextProps) {
@@ -87,12 +97,30 @@ export default class Quyu extends React.PureComponent {
     }
   }
   _loadSub = (type: string) => {
-    return (code: string) => {
+    return (code: string, name: string) => {
       if (type === "P") {
-        this.setState({ provinceCode: code, cityCode: null });
+        this.setState({
+          provinceCode: code,
+          cityCode: null,
+          homePlace: this.state.homePlace
+            .set("province", name)
+            .set("city", null)
+            .set("area", null)
+        });
+      } else if (type === "C") {
+        this.setState({
+          cityCode: code,
+          homePlace: this.state.homePlace.set("city", name).set("area", null)
+        });
       } else {
-        this.setState({ cityCode: code });
+        this.setState({
+          areaCode: code,
+          homePlace: this.state.homePlace.set("area", name)
+        });
       }
+      InteractionManager.runAfterInteractions(() => {
+        this.props.filter(this.state.homePlace.toObject());
+      });
     };
   };
   shouldComponentUpdate(nextProps, nextState) {
@@ -102,33 +130,60 @@ export default class Quyu extends React.PureComponent {
       right !== nr || provinceCode !== np || cityCode !== nc || loaded !== nl
     );
   }
+  resetHomeplace = () => {
+    let obj = {
+      provinceCode: null,
+      cityCode: null,
+      areaCode: null
+    };
+    if (!this.state.homePlace.isEmpty()) {
+      obj.homePlace = Immutable.Map({});
+    }
+    this.setState(obj);
+    InteractionManager.runAfterInteractions(() => {
+      this.props.filter({});
+    });
+  };
   render() {
     const { back } = this.props;
-    const { provinceCode, cityCode } = this.state;
+    const { provinceCode, cityCode, areaCode } = this.state;
     return (
       <Animated.View style={[styles.container, { right: this.state.right }]}>
         <View style={styles.titleContainer}>
-          <TouchableWithoutFeedback onPress={back}>
+          <TouchableOpacity onPress={back}>
             <Icon
               style={styles.backArrow}
               name="ios-arrow-back-outline"
               size={normalize(25)}
             />
-          </TouchableWithoutFeedback>
+          </TouchableOpacity>
           <DictItemTitle style={styles.selectedTitle}>出生地选择</DictItemTitle>
-          <TouchableWithoutFeedback>
+          <TouchableOpacity onPress={this.resetHomeplace}>
             <Icon
               style={styles.trash}
               name="ios-trash-outline"
               size={normalize(25)}
             />
-          </TouchableWithoutFeedback>
+          </TouchableOpacity>
         </View>
         <View style={styles.quyuContainer}>
-          {this.state.loaded && <QuyuProvince loadSub={this._loadSub("P")} />}
+          {this.state.loaded &&
+            <QuyuProvince
+              selected={provinceCode}
+              loadSub={this._loadSub("P")}
+            />}
           {provinceCode &&
-            <QuyuSub code={provinceCode} loadSub={this._loadSub("C")} />}
-          {cityCode && <QuyuSub code={cityCode} />}
+            <QuyuSub
+              selected={cityCode}
+              code={provinceCode}
+              loadSub={this._loadSub("C")}
+            />}
+          {cityCode &&
+            <QuyuSub
+              selected={areaCode}
+              loadSub={this._loadSub("A")}
+              code={cityCode}
+            />}
         </View>
         <View style={{ height: 60 }} />
       </Animated.View>

@@ -53,7 +53,8 @@ export default class QuyuSelector extends React.PureComponent {
   }
   save = () => {
     let obj = {};
-    const { value = {} } = this.props.navigation.state.params;
+    let { value = {} } = this.props.navigation.state.params;
+    value = value || {};
     if (
       value.province !== this.state.province ||
       value.city !== this.state.city ||

@@ -13,7 +13,7 @@ export function createNetworkLayer(token: string) {
   function fetchQuery(operation, variables, cacheConfig, uploadables) {
     // console.log("cacheConfigcacheConfig : " + JSON.stringify(cacheConfig));
     // console.log("operation", operation);
-    // console.log("request variables : ", JSON.stringify(variables));
+    console.log("request variables : ", JSON.stringify(variables));
     // if (cacheConfig && !cacheConfig.force) {
     //   let selector = createOperationSelector(operation, variables);
     //   console.log("selector : " + JSON.stringify(selector));

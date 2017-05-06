@@ -130,7 +130,7 @@ export default class TextEditor extends React.PureComponent {
               paddingVertical: 5
             }}
           >
-            <Text style={styles.tip}>{tip}</Text>
+            <Text style={styles.tip}>{tip}:{nodeId}</Text>
           </View>}
       </View>
     );

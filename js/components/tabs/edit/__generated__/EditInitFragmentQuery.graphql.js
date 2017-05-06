@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule EditInitFragmentQuery.graphql
- * @generated SignedSource<<7f7498f3aee402211f719c23bd16346b>>
- * @relayHash 96ee71633fcecb4b71e66d2b7cc83f1f
+ * @generated SignedSource<<5ec4ac051c52ed309e83fb617381f1d6>>
+ * @relayHash 3f19b6aa9da09292e4b828546cbeefee
  * @flow
  * @nogrep
  */
@@ -35,6 +35,7 @@ query EditInitFragmentQuery(
 }
 
 fragment EditInit_viewer on User {
+  id
   ossToken {
     Expiration
     AccessKeyId
@@ -79,24 +80,8 @@ fragment EditInit_article on Article {
     }
   }
   knowledge
-  notes(first: 10) {
-    edges {
-      node {
-        id
-        text
-        createdAt
-        __typename
-      }
-      cursor
-    }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      startCursor
-    }
-  }
   createdAt
+  submit
 }
 */
 
@@ -541,140 +526,17 @@ const batch /*: ConcreteBatch*/ = {
                     "storageKey": null
                   },
                   {
-                    "kind": "LinkedField",
+                    "kind": "ScalarField",
                     "alias": null,
-                    "args": [
-                      {
-                        "kind": "Literal",
-                        "name": "first",
-                        "value": 10,
-                        "type": "Int"
-                      }
-                    ],
-                    "concreteType": "NoteConnection",
-                    "name": "notes",
-                    "plural": false,
-                    "selections": [
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "NoteEdge",
-                        "name": "edges",
-                        "plural": true,
-                        "selections": [
-                          {
-                            "kind": "LinkedField",
-                            "alias": null,
-                            "args": null,
-                            "concreteType": "Note",
-                            "name": "node",
-                            "plural": false,
-                            "selections": [
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "args": null,
-                                "name": "id",
-                                "storageKey": null
-                              },
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "args": null,
-                                "name": "text",
-                                "storageKey": null
-                              },
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "args": null,
-                                "name": "createdAt",
-                                "storageKey": null
-                              },
-                              {
-                                "kind": "ScalarField",
-                                "alias": null,
-                                "args": null,
-                                "name": "__typename",
-                                "storageKey": null
-                              }
-                            ],
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "args": null,
-                            "name": "cursor",
-                            "storageKey": null
-                          }
-                        ],
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "LinkedField",
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "PageInfo",
-                        "name": "pageInfo",
-                        "plural": false,
-                        "selections": [
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "args": null,
-                            "name": "endCursor",
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "args": null,
-                            "name": "hasNextPage",
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "args": null,
-                            "name": "hasPreviousPage",
-                            "storageKey": null
-                          },
-                          {
-                            "kind": "ScalarField",
-                            "alias": null,
-                            "args": null,
-                            "name": "startCursor",
-                            "storageKey": null
-                          }
-                        ],
-                        "storageKey": null
-                      }
-                    ],
-                    "storageKey": "notes{\"first\":10}"
-                  },
-                  {
-                    "kind": "LinkedHandle",
-                    "alias": null,
-                    "args": [
-                      {
-                        "kind": "Literal",
-                        "name": "first",
-                        "value": 10,
-                        "type": "Int"
-                      }
-                    ],
-                    "handle": "connection",
-                    "name": "notes",
-                    "key": "article_notes",
-                    "filters": null
+                    "args": null,
+                    "name": "createdAt",
+                    "storageKey": null
                   },
                   {
                     "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "name": "createdAt",
+                    "name": "submit",
                     "storageKey": null
                   }
                 ]
@@ -686,7 +548,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query EditInitFragmentQuery(\n  $articleId: ID!\n  $include: Boolean!\n) {\n  viewer {\n    id\n    ...EditInit_viewer\n  }\n  article: node(id: $articleId) @include(if: $include) {\n    __typename\n    ...EditInit_article\n    id\n  }\n}\n\nfragment EditInit_viewer on User {\n  ossToken {\n    Expiration\n    AccessKeyId\n    SecurityToken\n    AccessKeySecret\n    dir\n  }\n}\n\nfragment EditInit_article on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  notes(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  createdAt\n}\n"
+  "text": "query EditInitFragmentQuery(\n  $articleId: ID!\n  $include: Boolean!\n) {\n  viewer {\n    id\n    ...EditInit_viewer\n  }\n  article: node(id: $articleId) @include(if: $include) {\n    __typename\n    ...EditInit_article\n    id\n  }\n}\n\nfragment EditInit_viewer on User {\n  id\n  ossToken {\n    Expiration\n    AccessKeyId\n    SecurityToken\n    AccessKeySecret\n    dir\n  }\n}\n\nfragment EditInit_article on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  createdAt\n  submit\n}\n"
 };
 
 module.exports = batch;

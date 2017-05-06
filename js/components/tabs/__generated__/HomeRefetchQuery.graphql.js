@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule HomeRefetchQuery.graphql
- * @generated SignedSource<<30122527a4283c7375a0958e502ab2be>>
- * @relayHash e2f62e1f0d83876c9e462bb04bd942bd
+ * @generated SignedSource<<55e0264e222618b53a01b4a9bacad679>>
+ * @relayHash 9acd0130e3cee8262ff6829163736467
  * @flow
  * @nogrep
  */
@@ -22,6 +22,8 @@ import type {ConcreteBatch} from 'relay-runtime';
 query HomeRefetchQuery(
   $count: Int
   $cursor: String
+  $conditions: ArticleFilters
+  $sorters: [QuerySorter]
 ) {
   viewer {
     id
@@ -30,7 +32,7 @@ query HomeRefetchQuery(
 }
 
 fragment ArticlePagination_viewer on User {
-  articles(first: $count, after: $cursor) {
+  articles(first: $count, after: $cursor, conditions: $conditions, sorters: $sorters) {
     pageInfo {
       startCursor
       endCursor
@@ -81,6 +83,18 @@ const batch /*: ConcreteBatch*/ = {
         "name": "cursor",
         "type": "String",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "conditions",
+        "type": "ArticleFilters",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "sorters",
+        "type": "[QuerySorter]",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -130,6 +144,18 @@ const batch /*: ConcreteBatch*/ = {
         "name": "cursor",
         "type": "String",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "conditions",
+        "type": "ArticleFilters",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "sorters",
+        "type": "[QuerySorter]",
+        "defaultValue": null
       }
     ],
     "kind": "Root",
@@ -163,9 +189,21 @@ const batch /*: ConcreteBatch*/ = {
               },
               {
                 "kind": "Variable",
+                "name": "conditions",
+                "variableName": "conditions",
+                "type": "ArticleFilters"
+              },
+              {
+                "kind": "Variable",
                 "name": "first",
                 "variableName": "count",
                 "type": "Int"
+              },
+              {
+                "kind": "Variable",
+                "name": "sorters",
+                "variableName": "sorters",
+                "type": "[QuerySorter]"
               }
             ],
             "concreteType": "ArticleConnection",
@@ -399,22 +437,37 @@ const batch /*: ConcreteBatch*/ = {
               },
               {
                 "kind": "Variable",
+                "name": "conditions",
+                "variableName": "conditions",
+                "type": "ArticleFilters"
+              },
+              {
+                "kind": "Variable",
                 "name": "first",
                 "variableName": "count",
                 "type": "Int"
+              },
+              {
+                "kind": "Variable",
+                "name": "sorters",
+                "variableName": "sorters",
+                "type": "[QuerySorter]"
               }
             ],
             "handle": "connection",
             "name": "articles",
             "key": "ArticlePagination_articles",
-            "filters": null
+            "filters": [
+              "conditions",
+              "sorters"
+            ]
           }
         ],
         "storageKey": null
       }
     ]
   },
-  "text": "query HomeRefetchQuery(\n  $count: Int\n  $cursor: String\n) {\n  viewer {\n    id\n    ...ArticlePagination_viewer\n  }\n}\n\nfragment ArticlePagination_viewer on User {\n  articles(first: $count, after: $cursor) {\n    pageInfo {\n      startCursor\n      endCursor\n      hasNextPage\n      hasPreviousPage\n    }\n    edges {\n      cursor\n      node {\n        gender\n        id\n        attachments\n        submit\n        title\n        categories\n        name\n        education\n        key\n        birthday\n        homePlace {\n          province\n          city\n          area\n        }\n        jobs\n        marriage\n        children\n        knowledge\n        createdAt\n        __typename\n      }\n    }\n  }\n}\n"
+  "text": "query HomeRefetchQuery(\n  $count: Int\n  $cursor: String\n  $conditions: ArticleFilters\n  $sorters: [QuerySorter]\n) {\n  viewer {\n    id\n    ...ArticlePagination_viewer\n  }\n}\n\nfragment ArticlePagination_viewer on User {\n  articles(first: $count, after: $cursor, conditions: $conditions, sorters: $sorters) {\n    pageInfo {\n      startCursor\n      endCursor\n      hasNextPage\n      hasPreviousPage\n    }\n    edges {\n      cursor\n      node {\n        gender\n        id\n        attachments\n        submit\n        title\n        categories\n        name\n        education\n        key\n        birthday\n        homePlace {\n          province\n          city\n          area\n        }\n        jobs\n        marriage\n        children\n        knowledge\n        createdAt\n        __typename\n      }\n    }\n  }\n}\n"
 };
 
 module.exports = batch;

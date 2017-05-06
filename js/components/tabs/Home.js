@@ -12,6 +12,7 @@ import styled from "styled-components/native";
 const { graphql, QueryRenderer } = require("react-relay");
 import ActionButton from "react-native-action-button";
 import Icon from "react-native-vector-icons/Ionicons";
+import Immutatble from "immutable";
 
 import FilterMask from "../filter/Mask";
 import Filters from "../filter/Filters";
@@ -48,7 +49,8 @@ export default class Home extends React.PureComponent {
     super(props);
     this.state = {
       isOpen: false,
-      dictLoaded: false
+      dictLoaded: false,
+      conditions: Immutatble.Map({})
     };
   }
   showFilters = () => {
@@ -69,7 +71,11 @@ export default class Home extends React.PureComponent {
       isOpen: false
     });
   };
-
+  _doFilter = (key: string, values: string | string[]): void => {
+    this.setState({
+      conditions: this.state.conditions.set(key, values)
+    });
+  };
   render() {
     var { isOpen, dictLoaded } = this.state;
     return (
@@ -77,7 +83,7 @@ export default class Home extends React.PureComponent {
         <TopHeader />
         {dictLoaded &&
           <FilterMask isOpen={isOpen} hindFilter={this.hindFilter} />}
-        {dictLoaded && <Filters isOpen={isOpen} />}
+        {dictLoaded && <Filters doFilter={this._doFilter} isOpen={isOpen} />}
         <Header
           showFilters={this.showFilters}
           navigation={this.props.navigation}
@@ -85,14 +91,21 @@ export default class Home extends React.PureComponent {
         <QueryRenderer
           environment={RelayEnvironment.current}
           query={graphql`
-            query HomeRefetchQuery($count: Int, $cursor: String) {
+            query HomeRefetchQuery($count: Int, $cursor: String, $conditions: ArticleFilters, $sorters: [QuerySorter]) {
                 viewer {
                   id,
                     ...ArticlePagination_viewer
                 }
             }`}
           variables={{
-            count: 10
+            count: 10,
+            conditions: this.state.conditions.toObject(),
+            sorters: [
+              {
+                order: "createdAt",
+                dir: "DESC"
+              }
+            ]
           }}
           render={({ error, props, rest }) => {
             if (props) {
@@ -104,11 +117,22 @@ export default class Home extends React.PureComponent {
             }
           }}
         />
-        <ActionButton
-          buttonColor="rgba(231,76,60,1)"
-          icon={<Icon name="md-create" style={styles.actionButtonIcon} />}
-          onPress={() => this.props.navigation.navigate("Add")}
-        />
+        <ActionButton buttonColor="rgba(231,76,60,1)">
+          <ActionButton.Item
+            buttonColor="#1abc9c"
+            title="草稿"
+            onPress={() => this.props.navigation.navigate("Drafts")}
+          >
+            <Icon name="ios-folder-open" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+          <ActionButton.Item
+            buttonColor="#9b59b6"
+            title="新建"
+            onPress={() => this.props.navigation.navigate("Add")}
+          >
+            <Icon name="md-create" style={styles.actionButtonIcon} />
+          </ActionButton.Item>
+        </ActionButton>
       </View>
     );
   }

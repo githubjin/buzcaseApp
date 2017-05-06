@@ -26,12 +26,16 @@ import { background, navigatorBlue } from "../../H8Colors";
 import { normalize } from "../../H8Text";
 import { caclateMarginHorizontal, paddingHorizontal } from "../../utils";
 import { endPoint, bucketName } from "./config";
-import { commit } from "./ArticleMutation";
+import { commit, submit } from "./ArticleMutation";
 import { dic_add_bnt_font_size } from "../../H8Size";
 import {
   ERROR_TITLE,
   UPLOAD_ERROR_CONTENT,
-  CAMERA_ERROR
+  CAMERA_ERROR,
+  DELETE_CONFITM_CONTENT,
+  DELETE_CONFITM_TITLE,
+  ARTICLE_SUBMIT_SUCCESS,
+  ARTICLE_SAVE_SUCCESS
 } from "../../../constants";
 
 const styles = StyleSheet.create({
@@ -97,11 +101,17 @@ const styles = StyleSheet.create({
     fontSize: dic_add_bnt_font_size,
     lineHeight: normalize(20),
     color: "#ffffff"
+  },
+  itemTitle: {
+    flex: 1,
+    fontWeight: "400",
+    lineHeight: normalize(25)
   }
 });
 export default class Add extends React.Component {
   props: {
-    article: Object
+    article: Object,
+    articleId: string
   };
   constructor(props) {
     super(props);
@@ -109,19 +119,124 @@ export default class Add extends React.Component {
       images: Immutatble.List([]),
       article: Immutatble.Map({}),
       birthdayDate: "",
-      birthdayTime: ""
+      birthdayTime: "",
+      alertText: null
     };
+    this.isUnmount = false;
   }
   componentWillReceiveProps(nextProps) {
-    console.log("nextPropsnextPropsnextPropsnextProps : ", nextProps);
+    if (nextProps.article && nextProps.article !== this.props.article) {
+      this.setState({
+        article: Immutatble.Map(nextProps.article)
+      });
+      // InteractionManager.runAfterInteractions(() => {
+      //   console.log("nextProps.article", nextProps.article);
+      //   console.log("this.props.article", this.props.article);
+      //   console.log(nextProps.article !== this.props.article);
+      //   console.log(this.state.article.toObject());
+      // });
+    }
   }
+  initSaveFunc() {
+    this.props.navigation.setParams({
+      save: this.save
+    });
+  }
+  validate = (): boolean => {
+    let artice = this.state.article.toObject();
+    let {
+      // attachments,
+      title,
+      categories,
+      name,
+      education,
+      gender,
+      birthday,
+      homePlace,
+      jobs,
+      marriage
+      // children,
+      // knowledge
+    } = artice;
+    let requiredFilled =
+      !_.isEmpty(title) &&
+      !_.isEmpty(categories) &&
+      !_.isEmpty(name) &&
+      !_.isEmpty(education) &&
+      !_.isEmpty(gender) &&
+      !_.isEmpty(`${birthday ? birthday : ""}`) &&
+      !_.isEmpty(homePlace) &&
+      !_.isEmpty(jobs) &&
+      !_.isEmpty(marriage);
+    return requiredFilled;
+  };
+  showResponseTip = (text: string): void => {
+    this.setState({
+      alertText: text
+    });
+    InteractionManager.runAfterInteractions(() => {
+      this.props.navigation.setParams({ edited: false });
+      let timer = setTimeout(() => {
+        clearTimeout(timer);
+        if (this.isUnmount) {
+          return;
+        }
+        this.setState({
+          alertText: null
+        });
+      }, 2000);
+    });
+  };
+  save = () => {
+    // console.log("saved !");
+    let _submit = !!this.state.article.get("submit");
+    // validate
+    let validated = this.validate();
+    if (validated && _submit) {
+      this.showResponseTip(ARTICLE_SUBMIT_SUCCESS);
+      return;
+    } else if (validated && !_submit) {
+      this.commit(
+        {
+          submit: true
+        },
+        null,
+        null,
+        response => {
+          // console.log(
+          //   "response.saveArticle.article.submit",
+          //   response.saveArticle.article.submit
+          //   // response.saveArticle.article.get("submit")
+          // );
+          if (response.saveArticle) {
+            // this.props.navigation.goBack(null);
+            this.setState({
+              article: this.state.article.set(
+                "submit",
+                response.saveArticle.article.submit
+              )
+            });
+            this.showResponseTip(ARTICLE_SUBMIT_SUCCESS);
+          }
+        },
+        true
+      );
+    } else {
+      this.showResponseTip(ARTICLE_SAVE_SUCCESS);
+    }
+  };
   componentDidMount() {
     this.initOss();
     let { birthday } = this.props.article || {};
+    const { filters } = this.props.navigation.state.params || {};
     this.setState({
       article: Immutatble.Map(this.props.article || { events: { edges: [] } }),
       birthdayDate: birthday ? moment(birthday).format("YYYY-MM-DD") : "",
-      birthdayTime: birthday ? moment(birthday).format("a hh:mm") : ""
+      birthdayTime: birthday ? moment(birthday).format("a hh:mm") : "",
+      filters: filters || {}
+    });
+    InteractionManager.runAfterInteractions(() => {
+      this.initSaveFunc();
     });
   }
   initOss = () => {
@@ -190,7 +305,7 @@ export default class Add extends React.Component {
   };
   getUploadProgess = (uri: string) => {
     let name = this.getImageFilenameMeta(uri).name;
-    console.log(`percent_${name}`, this.state[`percent_${name}`]);
+    // console.log(`percent_${name}`, this.state[`percent_${name}`]);
     return this.state[`percent_${name}`];
   };
   loadImg = () => {
@@ -237,7 +352,7 @@ export default class Add extends React.Component {
   };
   setBirthday = (b: boolean) => {
     return date => {
-      console.log("datedatedatedatedate is ", date);
+      // console.log("datedatedatedatedate is ", date);
       let birthday;
       if (b) {
         birthday = `${date} ${this.state.birthdayTime ? this.converDatePickerToTimer(this.state.birthdayTime) : ""}`;
@@ -253,12 +368,11 @@ export default class Add extends React.Component {
         }
         this.setState(obj);
       }
-      console.log("birthdaybirthdaybirthdaybirthday is ", birthday);
+      // console.log("birthdaybirthdaybirthdaybirthday is ", birthday);
       if (birthday) {
         InteractionManager.runAfterInteractions(() => {
           this.commit(
             {
-              id: this.state.article.get("id") || "new",
               keys: ["birthday"],
               values: [`Date:${moment(_.trim(birthday)).valueOf()}`]
             },
@@ -282,6 +396,7 @@ export default class Add extends React.Component {
     return t;
   };
   componentWillUnmount() {
+    this.isUnmount = true;
     ImagePicker.clean()
       .then(() => {
         console.log("removed all tmp images from tmp directory");
@@ -290,21 +405,23 @@ export default class Add extends React.Component {
         console.log("removed all tmp images from tmp directory error : ", e);
       });
   }
-  onBack = (
-    args: {
-      fieldName: string,
-      newValue: string | string[],
-      nodeId: string,
-      multiple: boolean
+  onBack = (args: {
+    fieldName: string,
+    newValue: string | string[],
+    nodeId: string,
+    multiple: boolean
+  }) => {
+    if (this.isUnmount) {
+      return;
     }
-  ) => {
     let _newValue = args.newValue;
     if (args.fieldName === "events" && _.isEmpty(args.nodeId)) {
       return this.addNewEvent(_newValue);
+    } else if (args.fieldName === "events" && !_.isEmpty(args.nodeId)) {
+      return this.updateEvennt(args.nodeId, _newValue);
     }
     this.commit(
       {
-        id: this.state.article.get("id") || "new",
         keys: [args.fieldName],
         values: [
           _.isString(_newValue)
@@ -316,27 +433,68 @@ export default class Add extends React.Component {
       _newValue
     );
   };
+  updateEvennt = (eventId: string, value: string): void => {
+    this.commit(
+      {
+        eventIds: [eventId],
+        eventValues: [value]
+      },
+      null,
+      null,
+      response => {
+        // console.log(response);
+        if (response.saveArticle && !this.props.article) {
+          let { updatedEvents, article } = response.saveArticle;
+          if (!_.isEmpty(updatedEvents)) {
+            let { edges: olderEdges } = this.state.article.get("events");
+            // console.log(_.concat(olderEdges.edges, updatedEvents));
+            let list = Immutatble.List(olderEdges);
+            list = list.update(
+              list.findIndex(function(item) {
+                return item.node.id === eventId;
+              }),
+              function(item) {
+                return { node: { ...item.node, text: value } };
+              }
+            );
+            if (this.isUnmount) {
+              return;
+            }
+            this.setState({
+              article: this.state.article
+                .set("events", {
+                  edges: list.toArray()
+                })
+                .set("id", article.id || article.__id)
+            });
+          }
+        }
+      }
+    );
+  };
   addNewEvent = (text: string) => {
     this.commit(
       {
-        id: this.state.article.get("id") || "new",
         addEvents: [text]
       },
       null,
       null,
       response => {
         // console.log(response);
-        if (response.saveArticle) {
+        if (response.saveArticle && !this.props.article) {
           let { newEvents, article } = response.saveArticle;
           if (!_.isEmpty(newEvents)) {
             let olderEdges = this.state.article.get("events");
-            console.log(_.concat(olderEdges.edges, newEvents));
+            // console.log(_.concat(olderEdges.edges, newEvents));
+            if (this.isUnmount) {
+              return;
+            }
             this.setState({
               article: this.state.article
                 .set("events", {
                   edges: _.concat(olderEdges.edges, newEvents)
                 })
-                .set("id", article.id)
+                .set("id", article.id || article.__id)
             });
           }
         }
@@ -347,21 +505,50 @@ export default class Add extends React.Component {
     input: Object,
     fieldName: string,
     newValue: string | Number,
-    onComplete: (response: Object) => void
+    onComplete: (response: Object) => void,
+    isSubmit: boolean = false
   ): void => {
-    commit(this.props.relay.environment, this.props.viewer, input, response => {
-      // console.log(response);
-      if (response.saveArticle && fieldName && newValue) {
-        this.setState({
-          article: this.state.article
-            .set(fieldName, newValue)
-            .set("id", response.saveArticle.article.id)
-        });
-      }
-      if (onComplete) {
-        onComplete(response);
-      }
-    });
+    let _input;
+    if (_.isBoolean(input.submit)) {
+      _input = input;
+    } else {
+      _input = { ...input, submit: !!this.state.article.get("submit") };
+    }
+    _input.id = this.state.article.get("id") || this.props.articleId || "new";
+    console.log("this.props.article", this.props.article);
+    var func = isSubmit ? submit : commit;
+    func(
+      this.props.relay.environment,
+      this.props.viewer,
+      _input,
+      response => {
+        // console.log(response);
+        if (
+          response.saveArticle &&
+          !this.props.articleId &&
+          fieldName &&
+          newValue
+        ) {
+          if (this.isUnmount) {
+            return;
+          }
+          this.setState({
+            article: this.state.article
+              .set(fieldName, newValue)
+              .set(
+                "id",
+                response.saveArticle.article.id ||
+                  response.saveArticle.article.__id
+              )
+          });
+        }
+        if (onComplete) {
+          onComplete(response);
+        }
+        this.props.navigation.setParams({ edited: true });
+      },
+      isSubmit ? this.state.filters : !this.props.article
+    );
   };
   formatValues = (values: string[] | Object, multiple: boolean): string => {
     if (_.isArray(values)) {
@@ -374,14 +561,28 @@ export default class Add extends React.Component {
     return JSON.stringify(values);
   };
   render() {
+    // console.log('this.state.article.get("submit")', this.props);
     const { viewer: { ossToken = {} } = {} } = this.props;
-    const { article } = this.state;
+    const { article, alertText } = this.state;
     const events = article.get("events");
+    // console.log("events events events : ", events);
     const { edges = [] } = events || {};
     // console.log("eventseventseventseventsevents : ", JSON.stringify(events));
     let showSwiper = this.state.images.size > 0;
     return (
       <View style={styles.container}>
+        {alertText &&
+          <View
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              backgroundColor: "rgba(0,168,84, 1)",
+              alignItems: "center",
+              paddingVertical: normalize(5)
+            }}
+          >
+            <Text style={{ color: "#ffffff" }}>{alertText}</Text>
+          </View>}
         <ScrollView>
           {showSwiper &&
             <Swiper height={150} style={styles.wrapper}>
@@ -419,6 +620,7 @@ export default class Add extends React.Component {
             multiline={true}
             maxLength={50}
             tip="4 - 50个字符，可由中英文、数字组成"
+            required={true}
           />
           <InputItem
             fieldName="categories"
@@ -426,6 +628,7 @@ export default class Add extends React.Component {
             multiline={true}
             value={this.state.article.get("categories")}
             onPress={this.editSelect("Category", true)}
+            required={true}
           />
           <InputItem
             placeholder="姓名/昵称"
@@ -435,12 +638,14 @@ export default class Add extends React.Component {
             tip="最多输入50字内容"
             value={this.state.article.get("name")}
             onPress={this.editText}
+            required={true}
           />
           <InputItem
             fieldName="gender"
             title="性别"
             value={this.state.article.get("gender")}
             onPress={this.editSelect("Gender")}
+            required={true}
           />
           <InputItem
             fieldName="birthday"
@@ -448,7 +653,8 @@ export default class Add extends React.Component {
             value=""
             showArrow={false}
             onPress={() => {}}
-            style={{ borderBottomWidth: 0 }}
+            style={{ borderBottomWidth: 0, paddingBottom: 0 }}
+            required={true}
           />
           <View style={[styles.item, { paddingVertical: 0 }]}>
             <DatePicker
@@ -508,24 +714,28 @@ export default class Add extends React.Component {
             value={this.state.article.get("homePlace")}
             onPress={this.quyuSelect}
             multiline={true}
+            required={true}
           />
           <InputItem
             fieldName="education"
             title="学历"
             value={this.state.article.get("education")}
             onPress={this.editSelect("Education")}
+            required={true}
           />
           <InputItem
             fieldName="jobs"
             title="职业"
             value={this.state.article.get("jobs")}
             onPress={this.editSelect("Job", true)}
+            required={true}
           />
           <InputItem
             fieldName="marriage"
             title="婚姻"
             value={this.state.article.get("marriage")}
             onPress={this.editSelect("Marriage")}
+            required={true}
           />
           <InputItem
             placeholder="请输入子女情况"
@@ -540,6 +750,7 @@ export default class Add extends React.Component {
           {edges.map((edge, index) => (
             <InputItem
               key={edge.node.id}
+              deleteEvent={this.deleteEvent(edge.node.id)}
               fieldName="events"
               nodeId={edge.node.id}
               title={`重要事件${index + 1}`}
@@ -607,6 +818,48 @@ export default class Add extends React.Component {
       });
     };
   };
+  deleteEvent = (eventId: string): (() => {}) => {
+    return () => {
+      Alert.alert(DELETE_CONFITM_TITLE, DELETE_CONFITM_CONTENT, [
+        { text: "否", onPress: () => {} },
+        {
+          text: "是",
+          onPress: () => {
+            this.commit(
+              {
+                subEvents: [eventId]
+              },
+              null,
+              null,
+              response => {
+                if (response.saveArticle && !this.props.article) {
+                  let { subEvents, article } = response.saveArticle;
+                  if (!_.isEmpty(subEvents)) {
+                    let olderEdges = this.state.article.get("events");
+                    _.remove(olderEdges.edges, (edge: Object) => {
+                      return edge.node.id === _.first(subEvents);
+                    });
+                    // console.log(olderEdges.length);
+                    // console.log(
+                    //   _.remove(olderEdges.edges, (edge: Object) => {
+                    //     return edge.node.id === _.first(subEvents);
+                    //   })
+                    // );
+                    console.log(olderEdges.length);
+                    this.setState({
+                      article: this.state.article
+                        .set("events", olderEdges)
+                        .set("id", article.id || article.__id)
+                    });
+                  }
+                }
+              }
+            );
+          }
+        }
+      ]);
+    };
+  };
 }
 
 const InputItem = (props: Object) => {
@@ -621,30 +874,33 @@ const InputItem = (props: Object) => {
     maxLength,
     showArrow = true,
     style = {},
-    nodeId
+    nodeId,
+    deleteEvent,
+    required = false
   } = props;
   let showText = "";
   if (_.isArray(value)) {
     showText = value.join("·");
   } else if (_.isObject(value)) {
-    showText = `${value.province}·${value.city}·${value.area}`;
+    showText = `${value.province}·${value.city || ""}·${value.area || ""}`;
   } else {
     showText = value;
   }
+  let isEvent = fieldName === "events";
   return (
-    <TouchableOpacity
-      onPress={onPress({
-        value,
-        title,
-        fieldName,
-        placeholder,
-        tip,
-        multiline,
-        maxLength,
-        nodeId
-      })}
-    >
-      <View>
+    <View>
+      <TouchableOpacity
+        onPress={onPress({
+          value,
+          title,
+          fieldName,
+          placeholder,
+          tip,
+          multiline,
+          maxLength,
+          nodeId
+        })}
+      >
         <View
           style={[
             {
@@ -658,9 +914,11 @@ const InputItem = (props: Object) => {
             style
           ]}
         >
-          <Text
-            style={{ flex: 1, fontWeight: "400", lineHeight: normalize(25) }}
-          >
+          <Text style={styles.itemTitle}>
+            {required &&
+              <Text style={{ color: "rgba(255,0,0,0.7)" }}>
+                *{" "}
+              </Text>}
             {title}
           </Text>
           {!multiline &&
@@ -681,29 +939,37 @@ const InputItem = (props: Object) => {
               size={20}
             />}
         </View>
-        {multiline &&
-          showText &&
-          <View
-            style={{
-              paddingHorizontal: paddingHorizontal + 20,
-              paddingVertical: 5,
-              borderBottomWidth: StyleSheet.hairlineWidth / PixelRatio.get(),
-              borderBottomColor: "#999999",
-              alignItems: "flex-end"
-            }}
-          >
-            <Text
-              style={{
+      </TouchableOpacity>
+      {multiline &&
+        showText &&
+        <View
+          style={{
+            paddingHorizontal: paddingHorizontal + (isEvent ? 0 : 20),
+            paddingVertical: 5,
+            borderBottomWidth: StyleSheet.hairlineWidth / PixelRatio.get(),
+            borderBottomColor: "#999999",
+            justifyContent: "flex-end",
+            flexDirection: "row"
+          }}
+        >
+          <Text
+            style={[
+              {
                 color: "#666666",
                 marginBottom: 3,
                 lineHeight: normalize(25)
-              }}
-            >
-              {showText}
-            </Text>
-          </View>}
-      </View>
-    </TouchableOpacity>
+              },
+              isEvent ? { marginLeft: 30 } : {}
+            ]}
+          >
+            {showText}
+          </Text>
+          {isEvent &&
+            <TouchableOpacity onPress={deleteEvent} style={{ paddingLeft: 10 }}>
+              <Icon name="ios-trash-outline" size={20} />
+            </TouchableOpacity>}
+        </View>}
+    </View>
   );
 };
 

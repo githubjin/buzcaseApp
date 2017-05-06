@@ -10,8 +10,10 @@ import {
   Platform,
   View,
   ScrollView,
-  SectionList
+  SectionList,
+  InteractionManager
 } from "react-native";
+import _ from "lodash";
 import { createFragmentContainer, graphql, QueryRenderer } from "react-relay";
 import { environment as RelayEnvironment } from "../../config/Environment";
 import { getHeaderPadding } from "../utils";
@@ -49,7 +51,8 @@ const VIEWABILITY_CONFIG = {
 
 class Filters extends Component {
   props: {
-    isOpen: boolean
+    isOpen: boolean,
+    doFilter: (key: string, value: string | string[]) => void
   };
   getRight() {
     return -getMaskWidth();
@@ -58,7 +61,8 @@ class Filters extends Component {
     super(props);
     this.state = {
       anim: new Animated.Value(this.props.isOpen ? 0 : this.getRight()),
-      quyuIsOpen: false
+      quyuIsOpen: false,
+      homePlace: {}
     };
   }
   componentWillReceiveProps(nextProps) {
@@ -69,12 +73,25 @@ class Filters extends Component {
       }).start();
     }
   }
-  _filter = code => {
-    return value => {
+  _filter = (fieldName: string) => {
+    return (value: string | string[], multiple: boolean) => {
       return () => {
-        console.log("code and value", code, value);
+        this.props.doFilter(fieldName, multiple ? value : _.first(value));
+        // console.log("code and value", fieldName, value);
       };
     };
+  };
+  filterByHomeplace = (homePlace: {
+    province?: string,
+    city?: string,
+    area?: string
+  }) => {
+    this.setState({
+      homePlace: homePlace
+    });
+    InteractionManager.runAfterInteractions(() => {
+      this.props.doFilter("homePlace", homePlace);
+    });
   };
   toggleQuyu = (open: boolean) => {
     return () => {
@@ -86,7 +103,7 @@ class Filters extends Component {
   _renderDicBox = ({ item }) => {
     return (
       <DictBox
-        filter={this._filter(item.type)}
+        filter={this._filter(item.fieldName)}
         title={item.title}
         edges={item.edges}
         multiple={item.multiple}
@@ -120,8 +137,15 @@ class Filters extends Component {
     } = this.props.viewer;
     return (
       <Animated.View style={[styles.container, { right: this.state.anim }]}>
-        <QuyuBoxTitle showQuyu={this.toggleQuyu(true)} />
-        <QuyuBox back={this.toggleQuyu(false)} isOpen={this.state.quyuIsOpen} />
+        <QuyuBoxTitle
+          showQuyu={this.toggleQuyu(true)}
+          homePlace={this.state.homePlace}
+        />
+        <QuyuBox
+          back={this.toggleQuyu(false)}
+          filter={this.filterByHomeplace}
+          isOpen={this.state.quyuIsOpen}
+        />
         <SectionList
           renderItem={this._renderDicBox}
           shouldItemUpdate={this.shouldItemUpdate}
@@ -130,6 +154,7 @@ class Filters extends Component {
               data: [
                 {
                   type: "Gender",
+                  fieldName: "gender",
                   edges: genders.edges,
                   title: "性别",
                   key: "Gender"
@@ -140,6 +165,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  fieldName: "categories",
                   type: "Category",
                   edges: categories.edges,
                   title: "类型",
@@ -152,6 +178,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  fieldName: "marriage",
                   type: "Marriage",
                   edges: marriages.edges,
                   title: "婚姻状况",
@@ -163,6 +190,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  fieldName: "education",
                   type: "Education",
                   edges: educations.edges,
                   title: "教育层次",
@@ -174,6 +202,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  fieldName: "jobs",
                   type: "Job",
                   edges: jobs.edges,
                   title: "工作",

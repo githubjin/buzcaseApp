@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule EditInit_article.graphql
- * @generated SignedSource<<b3e8c9f659b94c46f43fcf4df869887f>>
+ * @generated SignedSource<<2155000ae847f3eccc4cf3695bf2bf69>>
  * @flow
  * @nogrep
  */
@@ -27,8 +27,8 @@ export type EditInit_article = {
   children?: ?string;
   events?: ?EditInit_article_events;
   knowledge?: ?string;
-  notes?: ?EditInit_article_notes;
   createdAt?: ?any;
+  submit?: ?boolean;
 };
 
 export type EditInit_article_homePlace = {
@@ -50,20 +50,6 @@ export type EditInit_article_events_edges = {
 export type EditInit_article_events = {
   edges?: ?Array<?EditInit_article_events_edges>;
 };
-
-export type EditInit_article_notes_edges_node = {
-  id: string;
-  text?: ?string;
-  createdAt?: ?any;
-};
-
-export type EditInit_article_notes_edges = {
-  node?: ?EditInit_article_notes_edges_node;
-};
-
-export type EditInit_article_notes = {
-  edges?: ?Array<?EditInit_article_notes_edges>;
-};
 */
 
 /* eslint-disable comma-dangle, quotes */
@@ -79,14 +65,6 @@ const fragment /*: ConcreteFragment*/ = {
         "direction": "forward",
         "path": [
           "events"
-        ]
-      },
-      {
-        "count": null,
-        "cursor": null,
-        "direction": "forward",
-        "path": [
-          "notes"
         ]
       }
     ]
@@ -264,64 +242,17 @@ const fragment /*: ConcreteFragment*/ = {
       "storageKey": null
     },
     {
-      "kind": "LinkedField",
-      "alias": "notes",
+      "kind": "ScalarField",
+      "alias": null,
       "args": null,
-      "concreteType": "NoteConnection",
-      "name": "__article_notes_connection",
-      "plural": false,
-      "selections": [
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "args": null,
-          "concreteType": "NoteEdge",
-          "name": "edges",
-          "plural": true,
-          "selections": [
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "args": null,
-              "concreteType": "Note",
-              "name": "node",
-              "plural": false,
-              "selections": [
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "args": null,
-                  "name": "id",
-                  "storageKey": null
-                },
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "args": null,
-                  "name": "text",
-                  "storageKey": null
-                },
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "args": null,
-                  "name": "createdAt",
-                  "storageKey": null
-                }
-              ],
-              "storageKey": null
-            }
-          ],
-          "storageKey": null
-        }
-      ],
+      "name": "createdAt",
       "storageKey": null
     },
     {
       "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "name": "createdAt",
+      "name": "submit",
       "storageKey": null
     }
   ],

@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
 const EditContainer = createFragmentContainer(Edit, {
   viewer: graphql`
     fragment EditInit_viewer on User {
+      id,
       ossToken {
             Expiration
             AccessKeyId
@@ -58,16 +59,8 @@ const EditContainer = createFragmentContainer(Edit, {
         }
       },
       knowledge,
-      notes(first: 10)  @connection(key: "article_notes") {
-        edges {
-          node {
-            id,
-            text,
-            createdAt,
-          }
-        }
-      },
-      createdAt
+      createdAt,
+      submit
     }
   `
 });
@@ -75,14 +68,6 @@ const EditContainer = createFragmentContainer(Edit, {
 export default class DictionaryContainer extends React.PureComponent {
   props: {
     id: string
-  };
-  componentDidMount() {
-    this.props.navigation.setParams({
-      save: this.save
-    });
-  }
-  save = () => {
-    console.log("saved !");
   };
   shouldComponentUpdate(nextProps, nextState) {
     // console.log("nextPropsnextPropsnextPropsnextProps : ", nextProps);
@@ -112,6 +97,7 @@ export default class DictionaryContainer extends React.PureComponent {
                 {...this.props}
                 article={props.article}
                 viewer={props.viewer}
+                articleId={this.props.id}
               />
             );
           } else {

@@ -3,7 +3,7 @@ import styled from "styled-components/native";
 import {
   Text,
   TouchableHighlight,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   StyleSheet
 } from "react-native";
 import moment from "moment";
@@ -13,7 +13,7 @@ import { caclateMarginHorizontal } from "./utils";
 import "moment/locale/zh-cn";
 moment.locale("zh-cn");
 
-var Item = styled.View`
+export var Item = styled.View`
     marginVertical: 5;
     paddingVertical: 5;
     background-color: #ffffff;
@@ -21,13 +21,19 @@ var Item = styled.View`
     marginHorizontal: ${caclateMarginHorizontal()}
     position: relative;
 `;
-var MultiColRow = styled.View`
+export var Draft = styled.View`
+    background-color: #ffffff;
+    paddingHorizontal: 10;
+    marginHorizontal: ${caclateMarginHorizontal()}
+    position: relative;
+`;
+export var MultiColRow = styled.View`
     flex-direction: row;
     justify-content: space-between;
 `;
-var SingleRow = styled.View`
+export var SingleRow = styled.View`
 `;
-var IconWraper = styled(TouchableHighlight)`
+export var IconWraper = styled(TouchableHighlight)`
     position: absolute;
     right: 5;
     top: -5;
@@ -52,17 +58,17 @@ export default class ArticleItem extends PureComponent {
       index
     } = this.props;
     return (
-      <TouchableWithoutFeedback onPress={onPress(id)}>
+      <TouchableOpacity onPress={onPress(id)}>
         <Item style={styles.item}>
           <MultiColRow>
-            <MetaText>类别：{categories.join(" · ")}</MetaText>
+            <MetaText>类别：{categories && categories.join(" · ")}</MetaText>
             <IconWraper><Icon name="ios-close" size={30 * scale} /></IconWraper>
           </MultiColRow>
           <SingleRow>
             <ArticleTitle>{name}<Dot>●</Dot>{title}</ArticleTitle>
           </SingleRow>
           <MultiColRow>
-            <MetaText>{this.getHomeplace(homePlace)}</MetaText>
+            <MetaText>{this.getHomeplace(homePlace || {})}</MetaText>
             <MetaText>{"丁酉年·甲辰月·丁丑日·子时"}</MetaText>
           </MultiColRow>
           <ArticleContent>{knowledge}</ArticleContent>
@@ -71,12 +77,12 @@ export default class ArticleItem extends PureComponent {
             <MetaText>{moment(createdAt).fromNow()}</MetaText>
           </MultiColRow>
         </Item>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
     );
   }
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   item: {
     shadowRadius: 2,
     shadowColor: "black",

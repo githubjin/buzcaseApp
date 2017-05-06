@@ -93,16 +93,13 @@ class Selector extends React.PureComponent {
         multiple = false,
         edited = false
       } = this.props.navigation.state.params;
-      if (!edited) {
-        this.props.navigation.setParams({
-          ...this.props.navigation.state.params,
-          edited: true
-        });
-      }
       let { selected } = this.state;
       let newSlected;
       let has = _.includes(selected, text);
       if (has) {
+        if (_.size(selected) === 1) {
+          return;
+        }
         newSlected = _.reject(selected, s => s === text);
       } else {
         if (multiple) {
@@ -110,6 +107,12 @@ class Selector extends React.PureComponent {
         } else {
           newSlected = [text];
         }
+      }
+      if (!edited) {
+        this.props.navigation.setParams({
+          ...this.props.navigation.state.params,
+          edited: true
+        });
       }
       this.setState({
         selected: newSlected

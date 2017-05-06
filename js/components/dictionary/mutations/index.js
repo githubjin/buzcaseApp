@@ -26,12 +26,11 @@ export function commit(
     configs: id ? getSubConfig(user.id) : getAddconfigs(type, user.id),
     optimisticResponse: () => getOptimisticResponse(user, { id, name, order }),
     updater: store => {
+      const payload = store.getRootField(mutation.name);
       if (!id) {
-        const payload = store.getRootField(mutation.name);
         const newEdge = payload.getLinkedRecord("newEdge");
         sharedUpdater(store, user, newEdge, type, mutation.conn);
       } else {
-        const payload = store.getRootField(mutation.name);
         deleteNodeFromConn(
           store,
           user,

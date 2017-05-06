@@ -34,12 +34,20 @@ const styles = StyleSheet.create({
     flexDirection: "row"
   }
 });
-export default class ArticlePagination extends Component {
+class ArticlePagination extends Component {
   constructor(props) {
     super(props);
     this.state = {
       refreshing: false,
-      loadding: false
+      loadding: false,
+      filters: {
+        sorters: [
+          {
+            order: "createdAt",
+            dir: "DESC"
+          }
+        ]
+      }
     };
   }
   props: {
@@ -69,11 +77,14 @@ export default class ArticlePagination extends Component {
     this.setState({
       refreshing: true
     });
-
-    this.props.relay.refetchConnection(10, e => {
-      console.log("refresh error : ", e);
-      this.setState({
-        refreshing: false
+    InteractionManager.runAfterInteractions(() => {
+      this.props.relay.refetchConnection(10, e => {
+        // if (e) {
+        //   console.log("refresh error : ", e);
+        // }
+        this.setState({
+          refreshing: false
+        });
       });
     });
   };
@@ -89,7 +100,7 @@ export default class ArticlePagination extends Component {
         this.setState({
           loadding: false
         });
-        console.log(e);
+        // console.log(e);
       });
     });
   };
@@ -99,6 +110,7 @@ export default class ArticlePagination extends Component {
     const { viewer = {} } = this.props;
     const { articles = {} } = viewer;
     const { edges = [], pageInfo } = articles;
+    // console.log("edges-edges-edges-edges-edges- : ", JSON.stringify(edges));
     return (
       <FlatList
         onRefresh={this.onRefresh}
@@ -106,11 +118,13 @@ export default class ArticlePagination extends Component {
         style={styles.content}
         shouldItemUpdate={this._shouldItemUpdate}
         data={edges}
-        keyExtractor={(item, index) => item.node.key}
+        keyExtractor={(item, index) => item.node.id}
         legacyImplementation={false}
         renderItem={this.renderArticle}
         ListFooterComponent={props => (
           <FooterComponent
+            style={{ backgroundColor: "transparent" }}
+            moreStyle={{ color: "#000000" }}
             loadding={this.state.loadding}
             pageInfo={pageInfo}
             loadMore={this.__loadMore}
@@ -120,11 +134,13 @@ export default class ArticlePagination extends Component {
     );
   }
 }
-class FooterComponent extends Component {
+export class FooterComponent extends Component {
   props: {
     loadMore: () => void,
     pageInfo: Object,
-    loadding: boolean
+    loadding: boolean,
+    style: Object,
+    moreStyle: Object
   };
   render() {
     const {
@@ -141,8 +157,8 @@ class FooterComponent extends Component {
     }
     if (!hasNextPage) {
       return (
-        <View style={styles.listFooter}>
-          <More>没有更多案例了</More>
+        <View style={[styles.listFooter, this.props.style]}>
+          <More style={this.props.moreStyle}>没有更多案例了</More>
         </View>
       );
     }
@@ -156,12 +172,12 @@ class FooterComponent extends Component {
   }
 }
 
-module.exports = createPaginationContainer(
+const PaginationContainer = createPaginationContainer(
   ArticlePagination,
   {
     viewer: graphql`
       fragment ArticlePagination_viewer on User {
-        articles(first: $count, after: $cursor) @connection(key: "ArticlePagination_articles"){
+        articles(first: $count, after: $cursor, conditions:$conditions, sorters: $sorters) @connection(key: "ArticlePagination_articles"){
            pageInfo {
             startCursor,
             endCursor,
@@ -209,18 +225,20 @@ module.exports = createPaginationContainer(
       };
     },
     getVariables(props, { count, cursor }, fragmentVariables) {
-      console.log(
-        "count, cursorcount, cursorcount, cursorcount, cursor",
-        count,
-        cursor
-      );
+      // console.log(
+      //   "count, cursorcount, cursorcount, cursorcount, cursor",
+      //   count,
+      //   cursor
+      // );
       return {
         count,
-        cursor
+        cursor,
+        conditions: fragmentVariables.conditions,
+        sorters: fragmentVariables.sorters
       };
     },
     query: graphql`
-    query ArticlePaginationRefetchQuery($count: Int, $cursor: String) {
+    query ArticlePaginationRefetchQuery($count: Int, $cursor: String, $conditions: ArticleFilters, $sorters: [QuerySorter]) {
         viewer {
           id,
             ...ArticlePagination_viewer
@@ -228,3 +246,5 @@ module.exports = createPaginationContainer(
     }`
   }
 );
+
+export default PaginationContainer;

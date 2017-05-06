@@ -1,10 +1,6 @@
 // @flow
 import React, { PureComponent } from "react";
-import {
-  createFragmentContainer,
-  graphql,
-  QueryRenderer
-} from "react-relay";
+import { createFragmentContainer, graphql, QueryRenderer } from "react-relay";
 
 import { environment as RelayEnvironment } from "../../config/Environment";
 import QuyuList from "./QuyuList";
@@ -28,7 +24,11 @@ const Container = createFragmentContainer(QuyuList, {
 });
 
 export default class ProvinceContainer extends PureComponent {
+  props: {
+    selected?: string
+  };
   shouldComponentUpdate(nextProps, nextState) {
+    // return this.props.selected !== nextProps.selected;
     return false;
   }
   render() {

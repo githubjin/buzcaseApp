@@ -214,7 +214,11 @@ class Detail extends React.Component {
                 </ArticleDetailCardMeta>
               </View>
               <ArticleDetailCardMeta>
-                {categories.join("·")} - {jobs.join("·")} - {education}
+                {categories && categories.join("·")}
+                -
+                {jobs && jobs.join("·")}
+                -
+                {education}
               </ArticleDetailCardMeta>
               {homePlace &&
                 <ArticleDetailCardMeta style={styles.meta}>

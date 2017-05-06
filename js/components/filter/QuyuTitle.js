@@ -1,6 +1,6 @@
 // @flow
 import React, { PureComponent } from "react";
-import { Text, View, StyleSheet, TouchableHighlight } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { DictItemText, DictItemTitle, normalize } from "../H8Text";
 import { selected_red } from "../H8Colors";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -21,40 +21,44 @@ const styles = StyleSheet.create({
 export default class QuyuTitle extends PureComponent {
   props: {
     address: string,
-    showQuyu: () => void
+    showQuyu: () => void,
+    homePlace: {
+      province: string,
+      city: string,
+      area: string
+    }
   };
   render() {
-    const { address, showQuyu } = this.props;
+    const { homePlace = {}, showQuyu } = this.props;
+    let address =
+      (homePlace.province ? homePlace.province : "") +
+      (homePlace.city ? homePlace.city : "") +
+      (homePlace.area ? homePlace.area : "");
     return (
       <View style={styles.container}>
         <DictItemTitle>出生地点：</DictItemTitle>
-        {!address &&
-          <TouchableHighlight
-            onPress={showQuyu}
-            activeOpacity={0.5}
-            underlayColor={["transparent"]}
-          >
+        <TouchableOpacity onPress={showQuyu}>
+          {!address &&
             <DictItemText style={styles.adress}>
               请选择
-            </DictItemText>
-          </TouchableHighlight>}
-        {address &&
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-end"
-            }}
-          >
-            <Icon
-              style={[styles.adress, { marginRight: 2, marginBottom: 1 }]}
-              name="ios-pin-outline"
-              size={normalize(15)}
-            />
-            <DictItemText style={styles.adress}>
-              {_.truncate(address, { length: 15 })}
-            </DictItemText>
-          </View>}
-
+            </DictItemText>}
+          {!!address &&
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-end"
+              }}
+            >
+              <Icon
+                style={[styles.adress, { marginRight: 2, marginBottom: 1 }]}
+                name="ios-pin-outline"
+                size={normalize(15)}
+              />
+              <DictItemText style={styles.adress}>
+                {_.truncate(address, { length: 15 })}
+              </DictItemText>
+            </View>}
+        </TouchableOpacity>
       </View>
     );
   }
