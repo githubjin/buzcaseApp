@@ -23,28 +23,32 @@ export default class QuyuList extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      seleted: {},
-      pre: {}
+      selected: {},
+      pre: {},
+      trash: []
     };
   }
-  // componentWillReceiveProps(nextProps) {
-  //   // selected
-  //   if (nextProps.selected !== this.props.selected && !nextProps.selected) {
-  //     this.setState({
-  //       selected: {},
-  //       pre: {}
-  //     });
-  //   }
-  // }
+  componentWillReceiveProps(nextProps) {
+    // selected
+    if (nextProps.selected !== this.props.selected && !nextProps.selected) {
+      this.setState({
+        trash: [this.state.pre, this.state.selected],
+        selected: {},
+        pre: {}
+      });
+      // console.log(this.state.selected, this.state.pre, this.state.trash);
+    }
+  }
   changeHandler = item => {
     return () => {
-      if (this.state.seleted.id === item.id) {
+      if (this.state.selected.id === item.id) {
         return;
       }
       // console.log(item.id, item.name);
       this.setState({
-        pre: this.state.seleted,
-        seleted: item
+        pre: this.state.selected,
+        selected: item,
+        trash: []
       });
       if (this.props.loadSub) {
         InteractionManager.runAfterInteractions(() => {
@@ -60,7 +64,7 @@ export default class QuyuList extends React.PureComponent {
   };
   _renderItemComponent = ({ item }) => {
     let node = item.node ? item.node : item;
-    let checked = this.state.seleted.id === node.id;
+    let checked = this.state.selected.id === node.id;
     // console.log("_renderItemComponent", checked);
     return (
       <TouchableOpacity key={node.id} onPress={this.changeHandler(node)}>
@@ -92,22 +96,26 @@ export default class QuyuList extends React.PureComponent {
   _shouldItemUpdate = ({ item: prevItem = {} }, { item: nextItem = {} }) => {
     let prevItemId = prevItem.node ? prevItem.node.id : prevItem.id;
     let nextItemId = nextItem.node ? nextItem.node.id : nextItem.id;
-    let { seleted = {}, pre = {} } = this.state;
-    let isMe = nextItemId === seleted.id;
+    let { selected = {}, pre = {}, trash = [] } = this.state;
+    let isMe = nextItemId === selected.id;
     let isPreMe = nextItemId === pre.id;
+    let _isMe = nextItemId === (trash[1] ? trash[1].id : undefined);
+    let _isPreMe = nextItemId === (trash[0] ? trash[0].id : undefined);
     // console.log(
     //   prevItemId !== nextItemId || isMe || isPreMe,
     //   prevItemId !== nextItemId,
     //   isMe,
-    //   isPreMe
+    //   isPreMe,
+    //   _isMe,
+    //   _isPreMe
     // );
-    return prevItemId !== nextItemId || isMe || isPreMe;
+    return prevItemId !== nextItemId || isMe || isPreMe || _isMe || _isPreMe;
   };
   shouldComponentUpdate(nextProps, nextState) {
-    // console.log(this.state.seleted.id, nextState.seleted.id);
+    // console.log(this.state.selected.id, nextState.selected.id);
     return (
       this.props.viewer !== nextProps.viewer ||
-      this.state.seleted.id !== nextState.seleted.id ||
+      this.state.selected.id !== nextState.selected.id ||
       this.props.selected !== nextProps.selected
     );
   }

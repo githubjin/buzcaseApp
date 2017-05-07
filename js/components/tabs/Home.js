@@ -50,7 +50,13 @@ export default class Home extends React.PureComponent {
     this.state = {
       isOpen: false,
       dictLoaded: false,
-      conditions: Immutatble.Map({})
+      conditions: Immutatble.Map({}),
+      sorters: [
+        {
+          order: "createdAt",
+          dir: "DESC"
+        }
+      ]
     };
   }
   showFilters = () => {
@@ -77,7 +83,7 @@ export default class Home extends React.PureComponent {
     });
   };
   render() {
-    var { isOpen, dictLoaded } = this.state;
+    var { isOpen, dictLoaded, conditions, sorters } = this.state;
     return (
       <View style={styles.container}>
         <TopHeader />
@@ -100,17 +106,16 @@ export default class Home extends React.PureComponent {
           variables={{
             count: 10,
             conditions: this.state.conditions.toObject(),
-            sorters: [
-              {
-                order: "createdAt",
-                dir: "DESC"
-              }
-            ]
+            sorters: this.state.sorters
           }}
           render={({ error, props, rest }) => {
             if (props) {
               return (
-                <ArticlePagination {...this.props} viewer={props.viewer} />
+                <ArticlePagination
+                  filters={{ conditions: conditions.toObject(), sorters }}
+                  {...this.props}
+                  viewer={props.viewer}
+                />
               );
             } else {
               return <EmptyListLoading />;

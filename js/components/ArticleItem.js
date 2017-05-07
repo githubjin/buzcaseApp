@@ -1,15 +1,11 @@
 import React, { PureComponent } from "react";
 import styled from "styled-components/native";
-import {
-  Text,
-  TouchableHighlight,
-  TouchableOpacity,
-  StyleSheet
-} from "react-native";
+import { Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import moment from "moment";
 import Icon from "react-native-vector-icons/Ionicons";
 import { MetaText, ArticleTitle, Dot, ArticleContent, scale } from "./H8Text";
 import { caclateMarginHorizontal } from "./utils";
+import { DELETE_CONFITM_TITLE, DELETE_CONFITM_CONTENT } from "../constants";
 import "moment/locale/zh-cn";
 moment.locale("zh-cn");
 
@@ -33,15 +29,37 @@ export var MultiColRow = styled.View`
 `;
 export var SingleRow = styled.View`
 `;
-export var IconWraper = styled(TouchableHighlight)`
+export var IconWraper = styled(TouchableOpacity)`
     position: absolute;
-    right: 5;
-    top: -5;
+    right: -5;
+    top: -10;
+    paddingVertical: 5;
+    paddingHorizontal: 5;
 `;
 export default class ArticleItem extends PureComponent {
+  props: {
+    deleteArticle: (id: string) => void
+  };
   getHomeplace(item) {
     return `${item.province}${item.city}${item.area}`;
   }
+  deleteArticle = (id: string) => {
+    return () => {
+      Alert.alert(DELETE_CONFITM_TITLE, DELETE_CONFITM_CONTENT, [
+        { text: "否", onPress: () => {} },
+        {
+          text: "是",
+          onPress: () => {
+            // commit(this.props.relay.environment, this.props.viewer, {
+            //   id,
+            //   order
+            // });
+            this.props.deleteArticle(id);
+          }
+        }
+      ]);
+    };
+  };
   render() {
     const {
       item: {
@@ -62,7 +80,9 @@ export default class ArticleItem extends PureComponent {
         <Item style={styles.item}>
           <MultiColRow>
             <MetaText>类别：{categories && categories.join(" · ")}</MetaText>
-            <IconWraper><Icon name="ios-close" size={30 * scale} /></IconWraper>
+            <IconWraper onPress={this.deleteArticle(id)}>
+              <Icon name="ios-close" size={30 * scale} />
+            </IconWraper>
           </MultiColRow>
           <SingleRow>
             <ArticleTitle>{name}<Dot>●</Dot>{title}</ArticleTitle>

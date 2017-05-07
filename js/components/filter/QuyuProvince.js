@@ -28,8 +28,8 @@ export default class ProvinceContainer extends PureComponent {
     selected?: string
   };
   shouldComponentUpdate(nextProps, nextState) {
-    // return this.props.selected !== nextProps.selected;
-    return false;
+    return this.props.selected !== nextProps.selected;
+    // return false;
   }
   render() {
     // console.log("render", "-=-12301=-23=12-301=-301=-203=1-230");

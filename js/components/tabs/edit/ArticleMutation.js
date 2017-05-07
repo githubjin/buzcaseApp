@@ -21,7 +21,13 @@ type MutationInput = {
   eventValues?: string[],
   submit?: boolean
 };
-
+const delete_mutation = graphql`
+  mutation ArticleDeleteMutation($input: ArticleDeleteInput!) {
+        articlDel(input: $input) {
+          distroyedId
+        }
+      }
+`;
 const mutation = graphql`
       mutation ArticleMutation($input: ArticleMutationInput!) {
         saveArticle(input: $input) {
@@ -87,7 +93,7 @@ export function submit(
       input
     },
     updater: store => {
-      console.log(input.submit);
+      // console.log(input.submit);
       const userProxy = store.get(user.id);
       const payload = store.getRootField("saveArticle");
       const article = payload.getLinkedRecord("article");
@@ -117,6 +123,39 @@ export function submit(
   });
 }
 
+export function _delete(
+  environment,
+  user,
+  input: MutationInput,
+  onCompleted,
+  filters
+) {
+  return commitMutation(environment, {
+    delete_mutation,
+    variables: {
+      input
+    },
+    onError: error => {
+      console.log(error);
+      Alert.alert(ERROR_TITLE, ERROR_CONTENT);
+    },
+    updater: store => {
+      // console.log(input.submit);
+      const userProxy = store.get(user.id);
+      const payload = store.getRootField("articlDel");
+      const distroyedId = payload.getValue("distroyedId");
+      const conn = ConnectionHandler.getConnection(
+        userProxy,
+        "ArticlePagination_articles",
+        filters
+      );
+      if (conn) {
+        ConnectionHandler.deleteNode(conn, distroyedId);
+      }
+    },
+    onCompleted
+  });
+}
 export function commit(
   environment,
   user,

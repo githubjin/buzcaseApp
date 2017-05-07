@@ -7,7 +7,7 @@ import {
   FlatList,
   StyleSheet,
   Alert,
-  TouchableHighlight,
+  TouchableOpacity,
   ActivityIndicator,
   InteractionManager
 } from "react-native";
@@ -19,6 +19,7 @@ import Immutable from "immutable";
 import ArticleItem from "../ArticleItem";
 import { More } from "../H8Text";
 import { navigatorBlue } from "../H8Colors";
+import { _delete } from "./edit/ArticleMutation";
 
 const styles = StyleSheet.create({
   content: {
@@ -52,17 +53,29 @@ class ArticlePagination extends Component {
   }
   props: {
     navigation: Object,
-    viwwer: Object
+    viwwer: Object,
+    filters: Object
   };
   openArticle = id => {
     return () => {
       this.props.navigation.navigate("Detail", { id });
     };
   };
+  _deleteArticle = (id: string) => {
+    console.log("_deleteArticle");
+    _delete(
+      this.props.relay.environment,
+      this.props.viewer,
+      { id },
+      () => {},
+      this.props.filters
+    );
+  };
   renderArticle = ({ item, index }) => {
     // console.log(index, "itemitemitemitemitemitem", item.node.id);
     return (
       <ArticleItem
+        deleteArticle={this._deleteArticle}
         key={item.node.key}
         item={item.node}
         index={index}
@@ -163,11 +176,11 @@ export class FooterComponent extends Component {
       );
     }
     return (
-      <TouchableHighlight onPress={loadMore}>
+      <TouchableOpacity onPress={loadMore}>
         <View style={styles.listFooter}>
           <More>加载更多</More>
         </View>
-      </TouchableHighlight>
+      </TouchableOpacity>
     );
   }
 }

@@ -93600,13 +93600,14 @@ var QuyuList = function (_React$PureComponent) {
 
     _this.changeHandler = function (item) {
       return function () {
-        if (_this.state.seleted.id === item.id) {
+        if (_this.state.selected.id === item.id) {
           return;
         }
 
         _this.setState({
-          pre: _this.state.seleted,
-          seleted: item
+          pre: _this.state.selected,
+          selected: item,
+          trash: []
         });
         if (_this.props.loadSub) {
           _reactNative.InteractionManager.runAfterInteractions(function () {
@@ -93625,7 +93626,7 @@ var QuyuList = function (_React$PureComponent) {
       var item = _ref.item;
 
       var node = item.node ? item.node : item;
-      var checked = _this.state.seleted.id === node.id;
+      var checked = _this.state.selected.id === node.id;
 
       return _react2.default.createElement(
         _reactNative.TouchableOpacity,
@@ -93667,28 +93668,44 @@ var QuyuList = function (_React$PureComponent) {
       var prevItemId = prevItem.node ? prevItem.node.id : prevItem.id;
       var nextItemId = nextItem.node ? nextItem.node.id : nextItem.id;
       var _this$state = _this.state,
-          _this$state$seleted = _this$state.seleted,
-          seleted = _this$state$seleted === undefined ? {} : _this$state$seleted,
+          _this$state$selected = _this$state.selected,
+          selected = _this$state$selected === undefined ? {} : _this$state$selected,
           _this$state$pre = _this$state.pre,
-          pre = _this$state$pre === undefined ? {} : _this$state$pre;
+          pre = _this$state$pre === undefined ? {} : _this$state$pre,
+          _this$state$trash = _this$state.trash,
+          trash = _this$state$trash === undefined ? [] : _this$state$trash;
 
-      var isMe = nextItemId === seleted.id;
+      var isMe = nextItemId === selected.id;
       var isPreMe = nextItemId === pre.id;
+      var _isMe = nextItemId === (trash[1] ? trash[1].id : undefined);
+      var _isPreMe = nextItemId === (trash[0] ? trash[0].id : undefined);
 
-      return prevItemId !== nextItemId || isMe || isPreMe;
+      return prevItemId !== nextItemId || isMe || isPreMe || _isMe || _isPreMe;
     };
 
     _this.state = {
-      seleted: {},
-      pre: {}
+      selected: {},
+      pre: {},
+      trash: []
     };
     return _this;
   }
 
   babelHelpers.createClass(QuyuList, [{
+    key: "componentWillReceiveProps",
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.selected !== this.props.selected && !nextProps.selected) {
+        this.setState({
+          trash: [this.state.pre, this.state.selected],
+          selected: {},
+          pre: {}
+        });
+      }
+    }
+  }, {
     key: "shouldComponentUpdate",
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return this.props.viewer !== nextProps.viewer || this.state.seleted.id !== nextState.seleted.id || this.props.selected !== nextProps.selected;
+      return this.props.viewer !== nextProps.viewer || this.state.selected.id !== nextState.selected.id || this.props.selected !== nextProps.selected;
     }
   }, {
     key: "render",
@@ -94100,7 +94117,7 @@ var ProvinceContainer = function (_PureComponent) {
   babelHelpers.createClass(ProvinceContainer, [{
     key: "shouldComponentUpdate",
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return false;
+      return this.props.selected !== nextProps.selected;
     }
   }, {
     key: "render",
@@ -96674,7 +96691,7 @@ var FooterComponent = exports.FooterComponent = function (_Component2) {
         );
       }
       return _react2.default.createElement(
-        _reactNative.TouchableHighlight,
+        _reactNative.TouchableOpacity,
         { onPress: loadMore },
         _react2.default.createElement(
           _reactNative.View,
@@ -96733,7 +96750,7 @@ var _templateObject = babelHelpers.taggedTemplateLiteral(["\n    marginVertical:
     _templateObject2 = babelHelpers.taggedTemplateLiteral(["\n    background-color: #ffffff;\n    paddingHorizontal: 10;\n    marginHorizontal: ", "\n    position: relative;\n"], ["\n    background-color: #ffffff;\n    paddingHorizontal: 10;\n    marginHorizontal: ", "\n    position: relative;\n"]),
     _templateObject3 = babelHelpers.taggedTemplateLiteral(["\n    flex-direction: row;\n    justify-content: space-between;\n"], ["\n    flex-direction: row;\n    justify-content: space-between;\n"]),
     _templateObject4 = babelHelpers.taggedTemplateLiteral(["\n"], ["\n"]),
-    _templateObject5 = babelHelpers.taggedTemplateLiteral(["\n    position: absolute;\n    right: 5;\n    top: -5;\n"], ["\n    position: absolute;\n    right: 5;\n    top: -5;\n"]);
+    _templateObject5 = babelHelpers.taggedTemplateLiteral(["\n    position: absolute;\n    right: -5;\n    top: -10;\n    paddingVertical: 5;\n    paddingHorizontal: 5;\n"], ["\n    position: absolute;\n    right: -5;\n    top: -10;\n    paddingVertical: 5;\n    paddingHorizontal: 5;\n"]);
 
 var _react = require(12     ); // 12 = react
 
@@ -96757,6 +96774,8 @@ var _H8Text = require(1109      ); // 1109 = ./H8Text
 
 var _utils = require(945      ); // 945 = ./utils
 
+var _constants = require(944           ); // 944 = ../constants
+
 require(1251                 ); // 1251 = moment/locale/zh-cn
 
 _moment2.default.locale("zh-cn");
@@ -96765,14 +96784,30 @@ var Item = exports.Item = _native2.default.View(_templateObject, (0, _utils.cacl
 var Draft = exports.Draft = _native2.default.View(_templateObject2, (0, _utils.caclateMarginHorizontal)());
 var MultiColRow = exports.MultiColRow = _native2.default.View(_templateObject3);
 var SingleRow = exports.SingleRow = _native2.default.View(_templateObject4);
-var IconWraper = exports.IconWraper = (0, _native2.default)(_reactNative.TouchableHighlight)(_templateObject5);
+var IconWraper = exports.IconWraper = (0, _native2.default)(_reactNative.TouchableOpacity)(_templateObject5);
 
 var ArticleItem = function (_PureComponent) {
   babelHelpers.inherits(ArticleItem, _PureComponent);
 
   function ArticleItem() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     babelHelpers.classCallCheck(this, ArticleItem);
-    return babelHelpers.possibleConstructorReturn(this, (ArticleItem.__proto__ || Object.getPrototypeOf(ArticleItem)).apply(this, arguments));
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = babelHelpers.possibleConstructorReturn(this, (_ref = ArticleItem.__proto__ || Object.getPrototypeOf(ArticleItem)).call.apply(_ref, [this].concat(args))), _this), _this.deleteArticle = function (id) {
+      return function () {
+        _reactNative.Alert.alert(_constants.DELETE_CONFITM_TITLE, _constants.DELETE_CONFITM_CONTENT, [{ text: "否", onPress: function onPress() {} }, {
+          text: "是",
+          onPress: function onPress() {}
+        }]);
+      };
+    }, _temp), babelHelpers.possibleConstructorReturn(_this, _ret);
   }
 
   babelHelpers.createClass(ArticleItem, [{
@@ -96813,7 +96848,7 @@ var ArticleItem = function (_PureComponent) {
             ),
             _react2.default.createElement(
               IconWraper,
-              null,
+              { onPress: this.deleteArticle(id) },
               _react2.default.createElement(_Ionicons2.default, { name: "ios-close", size: 30 * _H8Text.scale })
             )
           ),
