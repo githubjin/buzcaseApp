@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule HomeRefetchQuery.graphql
- * @generated SignedSource<<55e0264e222618b53a01b4a9bacad679>>
- * @relayHash 9acd0130e3cee8262ff6829163736467
+ * @generated SignedSource<<ac832e29123817a6cf53e35b071aee88>>
+ * @relayHash d9abe49cde87a41983bf3d86f575689d
  * @flow
  * @nogrep
  */
@@ -24,14 +24,18 @@ query HomeRefetchQuery(
   $cursor: String
   $conditions: ArticleFilters
   $sorters: [QuerySorter]
+  $width: Int!
+  $height: Int!
+  $m: String
 ) {
   viewer {
-    id
     ...ArticlePagination_viewer
+    id
   }
 }
 
 fragment ArticlePagination_viewer on User {
+  id
   articles(first: $count, after: $cursor, conditions: $conditions, sorters: $sorters) {
     pageInfo {
       startCursor
@@ -44,7 +48,7 @@ fragment ArticlePagination_viewer on User {
       node {
         gender
         id
-        attachments
+        attachments_wh(width: $width, height: $height, m: $m)
         submit
         title
         categories
@@ -95,6 +99,24 @@ const batch /*: ConcreteBatch*/ = {
         "name": "sorters",
         "type": "[QuerySorter]",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "height",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -109,13 +131,6 @@ const batch /*: ConcreteBatch*/ = {
         "name": "viewer",
         "plural": false,
         "selections": [
-          {
-            "kind": "ScalarField",
-            "alias": null,
-            "args": null,
-            "name": "id",
-            "storageKey": null
-          },
           {
             "kind": "FragmentSpread",
             "name": "ArticlePagination_viewer",
@@ -155,6 +170,24 @@ const batch /*: ConcreteBatch*/ = {
         "kind": "LocalArgument",
         "name": "sorters",
         "type": "[QuerySorter]",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "height",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String",
         "defaultValue": null
       }
     ],
@@ -289,8 +322,27 @@ const batch /*: ConcreteBatch*/ = {
                       {
                         "kind": "ScalarField",
                         "alias": null,
-                        "args": null,
-                        "name": "attachments",
+                        "args": [
+                          {
+                            "kind": "Variable",
+                            "name": "height",
+                            "variableName": "height",
+                            "type": "Int!"
+                          },
+                          {
+                            "kind": "Variable",
+                            "name": "m",
+                            "variableName": "m",
+                            "type": "String"
+                          },
+                          {
+                            "kind": "Variable",
+                            "name": "width",
+                            "variableName": "width",
+                            "type": "Int!"
+                          }
+                        ],
+                        "name": "attachments_wh",
                         "storageKey": null
                       },
                       {
@@ -467,7 +519,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query HomeRefetchQuery(\n  $count: Int\n  $cursor: String\n  $conditions: ArticleFilters\n  $sorters: [QuerySorter]\n) {\n  viewer {\n    id\n    ...ArticlePagination_viewer\n  }\n}\n\nfragment ArticlePagination_viewer on User {\n  articles(first: $count, after: $cursor, conditions: $conditions, sorters: $sorters) {\n    pageInfo {\n      startCursor\n      endCursor\n      hasNextPage\n      hasPreviousPage\n    }\n    edges {\n      cursor\n      node {\n        gender\n        id\n        attachments\n        submit\n        title\n        categories\n        name\n        education\n        key\n        birthday\n        homePlace {\n          province\n          city\n          area\n        }\n        jobs\n        marriage\n        children\n        knowledge\n        createdAt\n        __typename\n      }\n    }\n  }\n}\n"
+  "text": "query HomeRefetchQuery(\n  $count: Int\n  $cursor: String\n  $conditions: ArticleFilters\n  $sorters: [QuerySorter]\n  $width: Int!\n  $height: Int!\n  $m: String\n) {\n  viewer {\n    ...ArticlePagination_viewer\n    id\n  }\n}\n\nfragment ArticlePagination_viewer on User {\n  id\n  articles(first: $count, after: $cursor, conditions: $conditions, sorters: $sorters) {\n    pageInfo {\n      startCursor\n      endCursor\n      hasNextPage\n      hasPreviousPage\n    }\n    edges {\n      cursor\n      node {\n        gender\n        id\n        attachments_wh(width: $width, height: $height, m: $m)\n        submit\n        title\n        categories\n        name\n        education\n        key\n        birthday\n        homePlace {\n          province\n          city\n          area\n        }\n        jobs\n        marriage\n        children\n        knowledge\n        createdAt\n        __typename\n      }\n    }\n  }\n}\n"
 };
 
 module.exports = batch;

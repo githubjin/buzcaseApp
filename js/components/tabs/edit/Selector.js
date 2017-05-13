@@ -6,7 +6,8 @@ import {
   PixelRatio,
   TouchableOpacity,
   FlatList,
-  InteractionManager
+  InteractionManager,
+  Platform
 } from "react-native";
 import { createFragmentContainer, graphql, QueryRenderer } from "react-relay";
 import { Container, Button } from "../../common";
@@ -35,8 +36,18 @@ const styles = StyleSheet.create({
     paddingVertical: normalize(10),
     flexDirection: "row",
     justifyContent: "space-between",
-    borderBottomWidth: StyleSheet.hairlineWidth / PixelRatio.get(),
-    borderBottomColor: "#999999"
+    ...Platform.select({
+      ios: {
+        borderBottomWidth: StyleSheet.hairlineWidth / PixelRatio.get(),
+        borderBottomColor: "#999999",
+        marginBottom: StyleSheet.hairlineWidth
+      },
+      android: {
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: "#999999",
+        marginBottom: 1
+      }
+    })
   },
   icon: {
     marginRight: normalize(10),

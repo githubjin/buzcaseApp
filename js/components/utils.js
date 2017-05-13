@@ -22,12 +22,12 @@ export function addSearchHistory(text: string): void {
         SEARCH_HISTORY_KEY,
         JSON.stringify(finalArr),
         error => {
-          console.log("addSearchHistory setItem error : ", error);
+          // console.log("addSearchHistory setItem error : ", error);
         }
       );
     })
     .catch(error => {
-      console.log("addSearchHistory getItem error : ", error);
+      // console.log("addSearchHistory getItem error : ", error);
     });
 }
 // 获取搜索历史
@@ -45,7 +45,7 @@ export function clearSearchHistory(): void {
 }
 
 export function getHeaderPadding() {
-  return Platform.OS === "ios" ? 20 : 3;
+  return Platform.OS === "ios" ? 20 : 0;
 }
 
 export function caclateMarginHorizontal() {
@@ -66,3 +66,22 @@ export function caclateCardWidth() {
 //   return 10;
 // }
 export const paddingHorizontal = normalize(10);
+
+const ossTokenKey = "oss_sts_token";
+export function saveOssStsToLocalstorage(ossToken: Object): void {
+  AsyncStorage.setItem(ossTokenKey, JSON.stringify(ossToken), error => {
+    // console.log("saveOssStsToLocalstorage setItem error : ", error);
+  });
+}
+export function getOssStsFromLocalstorage(
+  callback: (ossToken?: Object) => void
+): void {
+  AsyncStorage.getItem(ossTokenKey, (error, result) => {
+    if (error) {
+      // console.log("getOssStsFromLocalstorage getItem error : ", error);
+      callback(null);
+    } else {
+      callback(result ? JSON.parse(result) : null);
+    }
+  });
+}

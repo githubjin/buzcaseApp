@@ -6,14 +6,16 @@ import {
   ScrollView,
   Button,
   TouchableOpacity,
-  Platform,
   StyleSheet,
   Image,
   Alert,
   PixelRatio,
-  InteractionManager
+  InteractionManager,
+  ActivityIndicator,
+  Platform
 } from "react-native";
 import moment from "moment";
+moment.locale("zh-cn");
 import Icon from "react-native-vector-icons/Ionicons";
 import Swiper from "react-native-swiper";
 import ImagePicker from "react-native-image-crop-picker";
@@ -24,19 +26,27 @@ import Immutatble from "immutable";
 import DatePicker from "react-native-datepicker";
 import { background, navigatorBlue } from "../../H8Colors";
 import { normalize } from "../../H8Text";
-import { caclateMarginHorizontal, paddingHorizontal } from "../../utils";
-import { endPoint, bucketName } from "./config";
+import {
+  caclateMarginHorizontal,
+  paddingHorizontal,
+  getOssStsFromLocalstorage
+} from "../../utils";
+import { endPoint, bucketName, OSS_URL } from "./config";
 import { commit, submit } from "./ArticleMutation";
 import { dic_add_bnt_font_size } from "../../H8Size";
 import {
   ERROR_TITLE,
   UPLOAD_ERROR_CONTENT,
   CAMERA_ERROR,
+  LOAD_IMAGE_ERROR,
   DELETE_CONFITM_CONTENT,
   DELETE_CONFITM_TITLE,
   ARTICLE_SUBMIT_SUCCESS,
-  ARTICLE_SAVE_SUCCESS
+  ARTICLE_SAVE_SUCCESS,
+  EDIT_SWIPER_HEIGHT
 } from "../../../constants";
+import { updateOssSts } from "../mutation/OssUpdateMutation";
+import ImageWraper from "../../ImageWraper";
 
 const styles = StyleSheet.create({
   container: {
@@ -104,7 +114,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     flex: 1,
-    fontWeight: "400",
+    fontWeight: "500",
     lineHeight: normalize(25)
   }
 });
@@ -120,7 +130,8 @@ export default class Add extends React.Component {
       article: Immutatble.Map({}),
       birthdayDate: "",
       birthdayTime: "",
-      alertText: null
+      alertText: null,
+      ossToken: {}
     };
     this.isUnmount = false;
   }
@@ -145,7 +156,7 @@ export default class Add extends React.Component {
   validate = (): boolean => {
     let artice = this.state.article.toObject();
     let {
-      // attachments,
+      attachments_maxw,
       title,
       categories,
       name,
@@ -226,31 +237,90 @@ export default class Add extends React.Component {
     }
   };
   componentDidMount() {
-    this.initOss();
-    let { birthday } = this.props.article || {};
+    this.initOssStsQueue();
+    let { birthday, attachments_maxw, attachments } = this.props.article || {};
+    attachments_maxw = attachments_maxw || [];
     const { filters } = this.props.navigation.state.params || {};
     this.setState({
       article: Immutatble.Map(this.props.article || { events: { edges: [] } }),
       birthdayDate: birthday ? moment(birthday).format("YYYY-MM-DD") : "",
       birthdayTime: birthday ? moment(birthday).format("a hh:mm") : "",
-      filters: filters || {}
+      filters: filters || {},
+      images: this.state.images.push(
+        ...attachments_maxw.map((a: string, index: number) => {
+          return Immutatble.Map({
+            key: attachments[index],
+            done: true,
+            source: {
+              uri: a.replace("http", "https")
+            }
+          });
+        })
+      )
     });
     InteractionManager.runAfterInteractions(() => {
       this.initSaveFunc();
     });
   }
-  initOss = () => {
+  // getOssAccessObject = (): Object => {
+  //   const {
+  //     viewer: {
+  //       ossToken: {
+  //         Expiration,
+  //         AccessKeyId,
+  //         SecurityToken,
+  //         AccessKeySecret,
+  //         dir
+  //       } = {}
+  //     } = {}
+  //   } = this.props;
+  //   // console.log("Expiration------Expiration---:", Expiration);
+  //   return {
+  //     Expiration,
+  //     AccessKeyId,
+  //     SecurityToken,
+  //     AccessKeySecret,
+  //     dir
+  //   };
+  // };
+  updateOssStsToken = (callback: (ossToken: Object) => void = () => {}) => {
+    updateOssSts(this.props.relay.environment, (ossToken: Object) => {
+      if (_.isEmpty(ossToken) || _.isEmpty(ossToken.AccessKeyId)) {
+        Alert.alert("提示", "网络异常，无法初始化");
+      } else {
+        this.initOss(ossToken);
+        callback(ossToken);
+      }
+    });
+  };
+  initOssStsQueue = () => {
+    // 1. localstorage 2. 是否过期 3. ossStstUpdate
+    getOssStsFromLocalstorage((ossToken: Object) => {
+      if (_.isEmpty(ossToken) || _.isEmpty(ossToken.AccessKeyId)) {
+        // ossStstUpdate
+        this.updateOssStsToken();
+        return;
+      }
+      let diff = moment(ossToken.Expiration).diff(moment(), "minutes");
+      //10分钟内过期，或者已经过期
+      if (diff < 10) {
+        // ossStstUpdate
+        this.updateOssStsToken();
+      } else {
+        this.initOss(ossToken);
+      }
+    });
+  };
+  initOss = (ossToken: Object) => {
+    this.setState({ ossToken });
     const {
-      viewer: {
-        ossToken: {
-          Expiration,
-          AccessKeyId,
-          SecurityToken,
-          AccessKeySecret,
-          dir
-        } = {}
-      } = {}
-    } = this.props;
+      Expiration,
+      AccessKeyId,
+      SecurityToken,
+      AccessKeySecret,
+      dir
+    } = ossToken;
+    // } = this.getOssAccessObject();
     AliyunOSS.enableOSSLog();
     const config = {
       AccessKey: AccessKeyId,
@@ -259,28 +329,74 @@ export default class Add extends React.Component {
     };
     AliyunOSS.initWithKey(config, endPoint);
   };
-  upload = sourceFile => {
-    const { viewer: { ossToken: { dir } = {} } = {} } = this.props;
-    let suffix = this.getImageFilenameMeta(sourceFile).suffix;
+  initArticleBeforeUpload = (onComplete: response => void) => {
+    let article_id = this.state.article.get("id") || this.props.articleId;
+    if (!!article_id) {
+      onComplete();
+    } else {
+      this.commit({ keys: ["init"], values: ["0"] }, "init", "0", onComplete);
+    }
+  };
+  updateOssStstTokenPromise = () => {
+    return new Promise((resolve, reject) => {
+      this.updateOssStsToken((stsToken: Object) => {
+        resolve(stsToken);
+      });
+    });
+  };
+  checkOssStsIsvalid = (): Promise<Object> => {
+    if (
+      _.isEmpty(this.state.ossToken) ||
+      _.isEmpty(this.state.ossToken.Expiration)
+    ) {
+      // ossStstUpdate
+      return this.updateOssStstTokenPromise();
+    }
+    let { Expiration } = this.state.ossToken;
+    let diff = moment(Expiration).diff(moment(), "minutes");
+    //5分钟内过期，或者已经过期
+    if (diff < 5) {
+      // ossStstUpdate
+      return this.updateOssStstTokenPromise();
+    }
+    return Promise.resolve(this.state.ossToken);
+  };
+  upload = (images: Object[], index: number, keys: string[]): void => {
+    if (index >= images.length) {
+      return;
+    }
+    let sourceFile = images[index].path;
+    let filePathAndName = keys[index];
+    // 记录当前上传文件名
+    this.sourceFile = sourceFile;
+    this.filePathAndName = filePathAndName;
+    // 上传配置信息
     const uploadConfig = {
       bucketName,
       sourceFile,
-      ossFile: `${dir}/${uuidV4()}.${suffix}`
+      ossFile: filePathAndName
     };
-    AliyunOSS.addEventListener(
-      "uploadProgress",
-      this.uploadProgress(sourceFile)
-    );
+    // console.log(
+    //   "-----------------AliyunOSS.addEventListener-------------------"
+    // );
+    AliyunOSS.addEventListener("uploadProgress", this.uploadProgress);
     AliyunOSS.uploadObjectAsync(uploadConfig)
       .then(resp => {
         // resp is true
-        // console.log("resprespresprespresprespresp : ", resp);
-        AliyunOSS.removeEventListener(
-          "uploadProgress",
-          this.uploadProgress(sourceFile)
-        );
+        // console.log(
+        //   "=------------resprespresprespresprespresp----------- : ",
+        //   resp
+        // );
+        // console.log(
+        //   "-----------------AliyunOSS.removeEventListener-------------------"
+        // );
+        AliyunOSS.removeEventListener("uploadProgress", this.uploadProgress);
+        if (resp) {
+          this.upload(images, index + 1, keys);
+        }
       })
       .catch(error => {
+        console.log("-------------- upload error --------------", error);
         Alert.alert(ERROR_TITLE, UPLOAD_ERROR_CONTENT);
       });
   };
@@ -295,18 +411,126 @@ export default class Add extends React.Component {
       suffix: _.last(arr)
     };
   };
-  uploadProgress = sourceFile => {
-    return p => {
-      let name = this.getImageFilenameMeta(sourceFile).name;
-      let obj = {};
-      obj[`percent_${name}`] = p.currentSize / p.totalSize;
-      this.setState(obj);
+  uploadProgress = (p: Object): void => {
+    // console.log(
+    //   "----------------------p------------------------" + this.filePathAndName,
+    //   p.currentSize / p.totalSize
+    // );
+    let percent = p.currentSize / p.totalSize;
+    if (percent === 1) {
+      // console.log("------------------percent-----------------", percent);
+      this.updateImageUploadState(this.filePathAndName);
+      InteractionManager.runAfterInteractions(() => {
+        this.commit(
+          { keys: ["addImage"], values: [this.filePathAndName] },
+          null,
+          null,
+          () => {
+            // console.log("attachment url saved to parse server");
+          }
+        );
+      });
+    }
+  };
+  _deleteImage = (key: string): void => {
+    return () => {
+      this.commit(
+        {
+          keys: ["deleteImage"],
+          values: [key]
+        },
+        null,
+        null,
+        (response: Object) => {
+          let images = this.state.images;
+          images = images.delete(
+            images.findIndex(function(item) {
+              return item.get("key") === key;
+            })
+          );
+          this.setState({ images });
+        }
+      );
     };
   };
-  getUploadProgess = (uri: string) => {
-    let name = this.getImageFilenameMeta(uri).name;
-    // console.log(`percent_${name}`, this.state[`percent_${name}`]);
-    return this.state[`percent_${name}`];
+  updateImageUploadState = (key: string): void => {
+    let images = this.state.images;
+    let index = images.findIndex(function(item) {
+      return item.get("key") === key;
+    });
+    // console.log(
+    //   "-------------------updateImageUploadState21------------------------",
+    //   key,
+    //   index,
+    //   images.size
+    // );
+    // images.toArray().forEach(item => {
+    //   console.log(
+    //     `---------------------------${item.get("key")}----------------`
+    //   );
+    // });
+    if (index !== -1) {
+      images = images.update(index, function(item) {
+        return item.set("done", true);
+      });
+      this.setState({ images });
+    }
+  };
+  getOssObjectKey = (img: Object): string => {
+    let article_id = this.state.article.get("id") || this.props.articleId;
+    const { dir } = this.state.ossToken;
+    let suffix = this.getImageFilenameMeta(img.path).suffix;
+    let filePathAndName = `${dir}/${article_id}/${uuidV4()}.${suffix}`;
+    return filePathAndName;
+  };
+  imageHandler = (images: Object | Object[]) => {
+    if (images && !_.isArray(images)) {
+      images = [images];
+    }
+    console.log("images", images);
+    let keys = [];
+    let arr = images.map(image => {
+      let key = this.getOssObjectKey(image);
+      keys.push(key);
+      return Immutatble.Map({
+        key,
+        done: false,
+        source: { uri: image.path }
+      });
+    });
+    if (arr.length > 0) {
+      this.setState({
+        images: this.state.images.push(...arr)
+      });
+    }
+    this.upload(images, 0, keys);
+  };
+  imgErrorHandler = (type: number) => {
+    return (error: any): void => {
+      if (error) {
+        Alert.alert(
+          ERROR_TITLE,
+          JSON.stringify(error) + (type === 0 ? CAMERA_ERROR : LOAD_IMAGE_ERROR)
+        );
+      }
+    };
+  };
+  imageLoadSwitch = (type: number) => {
+    return () => {
+      this.checkOssStsIsvalid()
+        .then(ossToken => {
+          this.initArticleBeforeUpload(response => {
+            if (type === 1) {
+              this.loadImg();
+            } else {
+              this.camera();
+            }
+          });
+        })
+        .catch(error => {
+          Alert.alert("提示", "图片上传初始化异常");
+        });
+    };
   };
   loadImg = () => {
     ImagePicker.openPicker({
@@ -315,40 +539,16 @@ export default class Add extends React.Component {
       width: 300,
       height: 400
     })
-      .then((images: Object[]) => {
-        // console.log("images : ", images);
-        let arr = images.map(img => {
-          // this.upload(img.path);
-          return { uri: img.path };
-        });
-        if (arr.length > 0) {
-          this.setState({
-            images: this.state.images.push(...arr)
-          });
-        }
-      })
-      .catch(error => {
-        console.log("error : ", error);
-      });
+      .then(this.imageHandler)
+      .catch(this.imgErrorHandler(1));
   };
   camera = () => {
     ImagePicker.openCamera({
       width: 300,
-      height: 400,
-      cropping: true
+      height: 400
     })
-      .then((images: Object[]) => {
-        // console.log("images : ", images);
-        let arr = images.map(img => ({ uri: img.path }));
-        if (arr.length > 0) {
-          this.setState({
-            images: this.state.images.push(...arr)
-          });
-        }
-      })
-      .catch(error => {
-        Alert.alert(ERROR_TITLE, CAMERA_ERROR);
-      });
+      .then(this.imageHandler)
+      .catch(this.imgErrorHandler(0));
   };
   setBirthday = (b: boolean) => {
     return date => {
@@ -515,7 +715,7 @@ export default class Add extends React.Component {
       _input = { ...input, submit: !!this.state.article.get("submit") };
     }
     _input.id = this.state.article.get("id") || this.props.articleId || "new";
-    console.log("this.props.article", this.props.article);
+    // console.log("this.props.article", this.props.article);
     var func = isSubmit ? submit : commit;
     func(
       this.props.relay.environment,
@@ -562,7 +762,7 @@ export default class Add extends React.Component {
   };
   render() {
     // console.log('this.state.article.get("submit")', this.props);
-    const { viewer: { ossToken = {} } = {} } = this.props;
+    // const { viewer: { ossToken = {} } = {} } = this.props;
     const { article, alertText } = this.state;
     const events = article.get("events");
     // console.log("events events events : ", events);
@@ -585,26 +785,19 @@ export default class Add extends React.Component {
           </View>}
         <ScrollView>
           {showSwiper &&
-            <Swiper height={150} style={styles.wrapper}>
-              {this.state.images
-                .toArray()
-                .map((img, index) => (
-                  <Attachment
-                    key={index}
-                    percent={this.getUploadProgess(img.uri)}
-                    source={img}
-                  />
-                ))}
-            </Swiper>}
+            <ImageSwiper
+              deleteImage={this._deleteImage}
+              images={this.state.images}
+            />}
           <View style={styles.imageActions}>
-            <TouchableOpacity onPressIn={this.camera}>
+            <TouchableOpacity onPressIn={this.imageLoadSwitch(0)}>
               <View style={styles.imageAction}>
                 <Icon name="md-camera" style={styles.actionButtonIcon} />
                 <Text>命盘拍照</Text>
               </View>
             </TouchableOpacity>
             <View style={styles.spliter} />
-            <TouchableOpacity onPress={this.loadImg}>
+            <TouchableOpacity onPress={this.imageLoadSwitch(1)}>
               <View style={styles.imageAction}>
                 <Icon name="md-images" style={styles.actionButtonIcon} />
                 <Text>从相册选择命盘</Text>
@@ -845,7 +1038,7 @@ export default class Add extends React.Component {
                     //     return edge.node.id === _.first(subEvents);
                     //   })
                     // );
-                    console.log(olderEdges.length);
+                    // console.log(olderEdges.length);
                     this.setState({
                       article: this.state.article
                         .set("events", olderEdges)
@@ -917,7 +1110,7 @@ const InputItem = (props: Object) => {
           <Text style={styles.itemTitle}>
             {required &&
               <Text style={{ color: "rgba(255,0,0,0.7)" }}>
-                *{" "}
+                *
               </Text>}
             {title}
           </Text>
@@ -975,33 +1168,32 @@ const InputItem = (props: Object) => {
 
 class Attachment extends React.PureComponent {
   props: {
-    percent: number,
-    source: Object
+    source: Object,
+    ossKey: string,
+    done: boolean,
+    deleteImage: (key: string) => void
   };
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {
-  //     progress: 0
-  //   };
-  // }
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      this.props.percent !== nextProps.percent ||
-      this.props.source !== nextProps.source
-      // this.state.progress !== nextState.progress
+      this.props.source !== nextProps.source ||
+      this.props.done !== nextProps.done
     );
   }
-  // componentDidMount() {
-  //   setInterval(
-  //     function() {
-  //       this.setState({ progress: this.state.progress + 0.4 * Math.random() });
-  //     }.bind(this),
-  //     1000
-  //   );
-  // }
+  _deleteImage = (key: string) => {
+    return () => {
+      Alert.alert(DELETE_CONFITM_TITLE, DELETE_CONFITM_CONTENT, [
+        { text: "否", onPress: () => {} },
+        {
+          text: "是",
+          onPress: () => {
+            this.props.deleteImage(key)();
+          }
+        }
+      ]);
+    };
+  };
   render() {
-    const { percent = 0, source } = this.props;
-    let showText = `${Math.floor(percent * 100)}%`;
+    const { source, ossKey, done = false } = this.props;
     return (
       <View
         style={{
@@ -1009,19 +1201,77 @@ class Attachment extends React.PureComponent {
           height: "100%"
         }}
       >
-        <Image style={styles.avatar} source={source} />
-        <Text
-          style={{
-            fontSize: 20,
-            color: "#ffffff",
-            right: 0,
-            bottom: 0,
-            position: "absolute"
-          }}
-        >
-          {showText}
-        </Text>
+        <ImageWraper
+          loaderStyle={{ height: EDIT_SWIPER_HEIGHT, width: "100%" }}
+          style={styles.avatar}
+          source={source}
+        />
+        {done &&
+          <TouchableOpacity
+            style={{
+              right: 5,
+              top: 5,
+              position: "absolute",
+              backgroundColor: "#ffffff",
+              width: 20,
+              height: 20,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 2
+            }}
+            onPress={this._deleteImage(ossKey)}
+          >
+            <Icon color="rgba(231,76,60,1)" name="ios-trash" size={20} />
+          </TouchableOpacity>}
+        {!done &&
+          <ActivityIndicator
+            color="#ffffff"
+            style={{
+              right: 5,
+              bottom: 5,
+              position: "absolute"
+            }}
+            animating={true}
+          />}
       </View>
+    );
+  }
+}
+
+class ImageSwiper extends React.PureComponent {
+  props: {
+    images: Object,
+    del: () => void,
+    deleteImage: (key: string) => () => {}
+  };
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.images !== this.props.images;
+  }
+  render() {
+    const { images, deleteImage } = this.props;
+    return (
+      <Swiper
+        {...Platform.select({
+          ios: {
+            loadMinimalSize: 1,
+            loadMinimal: true
+          }
+        })}
+        height={EDIT_SWIPER_HEIGHT}
+        style={styles.wrapper}
+      >
+        {images.toArray().map((img, index) => {
+          return (
+            <Attachment
+              key={index}
+              deleteImage={deleteImage}
+              ossKey={img.get("key") || img.key}
+              source={img.get("source") || img.source}
+              done={img.get("done") || img.done}
+            />
+          );
+        })}
+      </Swiper>
     );
   }
 }

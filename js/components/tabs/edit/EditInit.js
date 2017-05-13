@@ -4,13 +4,15 @@ import {
   TouchableOpacity,
   Platform,
   StyleSheet,
-  InteractionManager
+  InteractionManager,
+  Dimensions
 } from "react-native";
 import { createFragmentContainer, graphql, QueryRenderer } from "react-relay";
 import Icon from "react-native-vector-icons/Ionicons";
 import { environment as RelayEnvironment } from "../../../config/Environment";
 import { EmptyListLoading } from "../../Loading";
 import Edit from "./Edit";
+import { paddingHorizontal } from "../../utils";
 
 const styles = StyleSheet.create({
   icon: {
@@ -19,22 +21,23 @@ const styles = StyleSheet.create({
 });
 
 const EditContainer = createFragmentContainer(Edit, {
-  viewer: graphql`
-    fragment EditInit_viewer on User {
-      id,
-      ossToken {
-            Expiration
-            AccessKeyId
-            SecurityToken
-            AccessKeySecret
-            dir
-        }
-    }
-  `,
+  // viewer: graphql`
+  //   fragment EditInit_viewer on User {
+  //     id,
+  //     ossToken {
+  //           Expiration
+  //           AccessKeyId
+  //           SecurityToken
+  //           AccessKeySecret
+  //           dir
+  //       }
+  //   }
+  // `,
   article: graphql`
     fragment EditInit_article on Article {
       id,
       attachments,
+      attachments_maxw(width: $width),
       title,
       categories,
       name,
@@ -79,16 +82,19 @@ export default class DictionaryContainer extends React.PureComponent {
       <QueryRenderer
         environment={RelayEnvironment.current}
         query={graphql`
-            query EditInitFragmentQuery($articleId: ID!, $include: Boolean!) {
+            query EditInitFragmentQuery($articleId: ID!, $include: Boolean!, $width: Int!) {
                 viewer {
                   id,
-                    ...EditInit_viewer
                 },
                 article:node(id: $articleId) @include(if: $include) {
                   ...EditInit_article
                 }
             }`}
-        variables={{ articleId: id, include: id !== "0" }}
+        variables={{
+          articleId: id,
+          include: id !== "0",
+          width: Dimensions.get("window").width - 2 * paddingHorizontal
+        }}
         cacheConfig={{ force: false }}
         render={({ error, props, rest }) => {
           if (props) {

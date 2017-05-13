@@ -12,7 +12,7 @@ export function getAddconfigs(type: string, viewerId: string) {
       connectionName: "dic",
       edgeName: "newEdge",
       rangeBehaviors: (ast: any) => {
-        console.log("astastastastastast", ast);
+        // console.log("astastastastastast", ast);
         if (ast.code === type) {
           return "append";
         } else {

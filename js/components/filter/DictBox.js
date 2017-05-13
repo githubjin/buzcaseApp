@@ -49,8 +49,15 @@ export default class DictBox extends React.PureComponent {
     edges: Object[],
     title: string,
     filter: (selected: string | string[], multiple: boolean) => () => {},
-    multiple: boolean
+    multiple: boolean,
+    resetSignal: number
   };
+  componentWillReceiveProps(nextProps) {
+    //
+    if (nextProps.resetSignal !== this.props.resetSignal) {
+      this.setState({ selected: [] });
+    }
+  }
   shouldComponentUpdate(nextProps, nextState) {
     return (
       this.props.edges.length !== nextProps.edges.length ||

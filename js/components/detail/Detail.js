@@ -5,7 +5,13 @@ import {
   ScrollView,
   StyleSheet,
   Animated,
-  TouchableOpacity
+  TouchableOpacity,
+  Dimensions,
+  Image,
+  Modal,
+  Platform,
+  TouchableWithoutFeedback,
+  ActivityIndicator
 } from "react-native";
 const {
   graphql,
@@ -14,6 +20,7 @@ const {
 } = require("react-relay");
 import Icon from "react-native-vector-icons/Ionicons";
 import moment from "moment";
+import Swiper from "react-native-swiper";
 import { environment as RelayEnvironment } from "../../config/Environment";
 import { EmptyListLoading } from "../Loading";
 import {
@@ -38,6 +45,9 @@ import {
   BackButton,
   TopHeader
 } from "../common";
+import { DETAIL_SWIPER_HEIGHT } from "../../constants";
+import ImageWraper from "../ImageWraper";
+
 const styles = StyleSheet.create({
   header: {
     backgroundColor: "#3385ff",
@@ -65,11 +75,18 @@ const styles = StyleSheet.create({
     marginTop: -normalize(45),
     width: "100%",
     padding: normalize(10),
-    shadowRadius: 2,
-    shadowColor: "black",
-    shadowOpacity: 0.2,
-    shadowOffset: { height: 1, width: 1 },
-    marginBottom: normalize(15)
+    marginBottom: normalize(15),
+    ...Platform.select({
+      ios: {
+        shadowRadius: 2,
+        shadowColor: "black",
+        shadowOpacity: 0.2,
+        shadowOffset: { height: 1, width: 1 }
+      },
+      android: {
+        backgroundColor: "#ffffff"
+      }
+    })
   },
   section: {
     marginHorizontal: caclateMarginHorizontal(),
@@ -99,24 +116,86 @@ const styles = StyleSheet.create({
     paddingHorizontal,
     left: 0,
     right: 0
+  },
+  wrapper: {},
+  image: {
+    width: Dimensions.get("window").width - 2 * paddingHorizontal,
+    height: DETAIL_SWIPER_HEIGHT
+  },
+  fullScreenImg: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height
   }
 });
 class Detail extends React.Component {
+  props: {
+    node: Object
+  };
   constructor(props) {
     super(props);
     this.state = {
-      scrollTop: new Animated.Value(0)
+      scrollTop: new Animated.Value(0),
+      filters: {},
+      showBigImg: false,
+      imageIndex: 0
     };
+  }
+  componentDidMount() {
+    const { filters } = this.props.navigation.state.params;
+    this.setState({ filters });
   }
   editIt = (id: string) => {
     return () => {
-      this.props.navigation.navigate("Add", { id });
+      this.props.navigation.navigate("Add", {
+        id,
+        filters: this.state.filters
+      });
+    };
+  };
+  hideBigImg = (): void => {
+    this.setState({
+      showBigImg: false
+    });
+  };
+  showBigImg = (uri: string, index: number): void => {
+    return () => {
+      // console.log("showBigImg");
+      this.setState({
+        showBigImg: true,
+        imageIndex: index
+      });
     };
   };
   render() {
     // console.log(
     //   "detail renderdetail renderdetail renderdetail renderdetail render "
     // );
+    if (!this.props.node) {
+      return (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ fontWeight: "500" }}>该案例不存在</Text>
+          <TouchableOpacity
+            onPress={() => {
+              this.props.navigation.goBack(null);
+            }}
+          >
+            <View
+              style={{
+                width: "100%",
+                alignItems: "center",
+                marginVertical: 20
+              }}
+            >
+              <Text style={{ color: "#666666" }}>
+                返回
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      );
+    }
     const {
       node: {
         marriage,
@@ -133,7 +212,9 @@ class Detail extends React.Component {
         events,
         notes,
         createdAt,
-        id
+        id,
+        attachments_maxw,
+        attachments_wh
       }
     } = this.props;
     return (
@@ -165,6 +246,7 @@ class Detail extends React.Component {
           <ScrollView
             horizontal={true}
             style={styles.title}
+            showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.titleContent}
           >
             <ArticleDetailTitle style={{ color: "#ffffff" }}>
@@ -225,6 +307,33 @@ class Detail extends React.Component {
                   {homePlace.province}·{homePlace.city}·{homePlace.area}
                 </ArticleDetailCardMeta>}
             </View>
+            {attachments_maxw &&
+              attachments_maxw.length > 0 &&
+              <Swiper
+                {...Platform.select({
+                  ios: {
+                    loadMinimalSize: 1,
+                    loadMinimal: true
+                  }
+                })}
+                height={DETAIL_SWIPER_HEIGHT}
+                style={styles.wrapper}
+              >
+                {attachments_maxw.map((img, index) => (
+                  <TouchableWithoutFeedback
+                    key={`img_${index}`}
+                    onPress={this.showBigImg(
+                      img.replace("http", "https"),
+                      index
+                    )}
+                  >
+                    <ImageWraper
+                      style={styles.image}
+                      source={{ uri: img.replace("http", "https") }}
+                    />
+                  </TouchableWithoutFeedback>
+                ))}
+              </Swiper>}
             <View style={styles.section}>
               <FieldCard title="子女情况" value={children} />
               <FieldCard title="命理知识备注" value={knowledge} />
@@ -236,6 +345,20 @@ class Detail extends React.Component {
             </ArticleDetailCardMeta>
           </View>
         </PageContainer>
+        <Modal
+          animationType={"slide"}
+          transparent={false}
+          visible={this.state.showBigImg}
+          animationType="none"
+          onRequestClose={() => this.setState({ showBigImg: false })}
+        >
+          <ImageSwiper
+            attachments_maxw={attachments_maxw}
+            index={this.state.imageIndex}
+            attachments={attachments_wh}
+            hideBigImg={this.hideBigImg}
+          />
+        </Modal>
       </View>
     );
   }
@@ -259,11 +382,77 @@ const FieldCard = props => {
   );
 };
 
+class ImageSwiper extends React.PureComponent {
+  props: {
+    attachments?: string[],
+    attachments_maxw?: string[],
+    index: number,
+    hideBigImg: () => void
+  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: true
+    };
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      nextProps.attachments !== this.props.attachments ||
+      this.state.loading !== nextState.loading
+    );
+  }
+  render() {
+    const { attachments = [], index = 0, attachments_maxw } = this.props;
+    if (!attachments || attachments.length === 0) {
+      return null;
+    }
+    if (Platform.OS === "android") {
+      return (
+        <ImageWraper
+          resizeMode="stretch"
+          style={styles.fullScreenImg}
+          defaultSourceStyle={styles.image}
+          defaultSource={{
+            uri: attachments_maxw[index].replace("http", "https")
+          }}
+          source={{
+            uri: attachments[index].replace("http", "https")
+          }}
+        />
+      );
+    }
+    return (
+      <Swiper
+        index={index}
+        loadMinimalSize={1}
+        loadMinimal={true}
+        style={styles.wrapper}
+      >
+        {attachments.map((img, index) => (
+          <TouchableWithoutFeedback
+            onPress={this.props.hideBigImg}
+            key={`img_${index}`}
+          >
+            <ImageWraper
+              resizeMode="stretch"
+              style={styles.fullScreenImg}
+              source={{
+                uri: img.replace("http", "https")
+              }}
+            />
+          </TouchableWithoutFeedback>
+        ))}
+      </Swiper>
+    );
+  }
+}
+
 const Container = createFragmentContainer(Detail, {
   node: graphql`
     fragment Detail_node on Article {
       id,
-      attachments,
+      attachments_maxw(width: $width),
+      attachments_wh(width:$fullWidth, height:$fullHeight, m: $m),
       title,
       categories,
       name,
@@ -311,14 +500,18 @@ export default _props => {
   return (
     <QueryRenderer
       query={graphql`
-        query DetailQuery($articleId: ID!) {
+        query DetailQuery($articleId: ID!, $width: Int!, $fullHeight: Int!, $fullWidth: Int!, $m: String) {
           node(id: $articleId) {
             ...Detail_node
           }
         }
       `}
       variables={{
-        articleId: id
+        articleId: id,
+        width: Dimensions.get("window").width - 2 * paddingHorizontal,
+        fullHeight: Dimensions.get("window").height,
+        fullWidth: Dimensions.get("window").width,
+        m: "m_pad"
       }}
       environment={RelayEnvironment.current}
       render={({ error, props, rest }) => {

@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule SearchResultRefetchQuery.graphql
- * @generated SignedSource<<c99f71c6ef27ba59312c5cc1902af806>>
- * @relayHash c8fcd31d60c39a4ecb626980f915c30f
+ * @generated SignedSource<<e5920bfb65458b392a464f73a92ea2ec>>
+ * @relayHash c4830e1a84a2a5e9748b406da157f450
  * @flow
  * @nogrep
  */
@@ -36,14 +36,12 @@ fragment SearchResult_viewer on User {
       article
       name
       title
-      highlight
       createdAt
     }
     titles {
       article
       name
       title
-      highlight
       createdAt
     }
   }
@@ -198,13 +196,6 @@ const batch /*: ConcreteBatch*/ = {
                         "kind": "ScalarField",
                         "alias": null,
                         "args": null,
-                        "name": "highlight",
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "args": null,
                         "name": "createdAt",
                         "storageKey": null
                       }
@@ -244,13 +235,6 @@ const batch /*: ConcreteBatch*/ = {
                         "kind": "ScalarField",
                         "alias": null,
                         "args": null,
-                        "name": "highlight",
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "args": null,
                         "name": "createdAt",
                         "storageKey": null
                       }
@@ -267,7 +251,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query SearchResultRefetchQuery(\n  $token: String!\n  $size: Int!\n  $skip: Boolean!\n) {\n  viewer {\n    ...SearchResult_viewer\n    id\n  }\n}\n\nfragment SearchResult_viewer on User {\n  autocomplete(token: $token, size: $size) @skip(if: $skip) {\n    names {\n      article\n      name\n      title\n      highlight\n      createdAt\n    }\n    titles {\n      article\n      name\n      title\n      highlight\n      createdAt\n    }\n  }\n}\n"
+  "text": "query SearchResultRefetchQuery(\n  $token: String!\n  $size: Int!\n  $skip: Boolean!\n) {\n  viewer {\n    ...SearchResult_viewer\n    id\n  }\n}\n\nfragment SearchResult_viewer on User {\n  autocomplete(token: $token, size: $size) @skip(if: $skip) {\n    names {\n      article\n      name\n      title\n      createdAt\n    }\n    titles {\n      article\n      name\n      title\n      createdAt\n    }\n  }\n}\n"
 };
 
 module.exports = batch;

@@ -9,7 +9,8 @@ import {
   Alert,
   TouchableOpacity,
   ActivityIndicator,
-  InteractionManager
+  InteractionManager,
+  Platform
 } from "react-native";
 import styled from "styled-components/native";
 const { createPaginationContainer, graphql } = require("react-relay");
@@ -19,7 +20,7 @@ import Immutable from "immutable";
 import ArticleItem from "../ArticleItem";
 import { More } from "../H8Text";
 import { navigatorBlue } from "../H8Colors";
-import { _delete } from "./edit/ArticleMutation";
+import { _delete } from "./edit/DeleteMutation";
 
 const styles = StyleSheet.create({
   content: {
@@ -54,15 +55,19 @@ class ArticlePagination extends Component {
   props: {
     navigation: Object,
     viwwer: Object,
-    filters: Object
+    filters: Object,
+    loadDict: () => void
   };
   openArticle = id => {
     return () => {
-      this.props.navigation.navigate("Detail", { id });
+      this.props.navigation.navigate("Detail", {
+        id,
+        filters: this.props.filters
+      });
     };
   };
   _deleteArticle = (id: string) => {
-    console.log("_deleteArticle");
+    // console.log("_deleteArticle");
     _delete(
       this.props.relay.environment,
       this.props.viewer,
@@ -117,12 +122,18 @@ class ArticlePagination extends Component {
       });
     });
   };
+  componentDidMount() {
+    if (Platform.OS === "android") {
+      this.props.loadDict && this.props.loadDict();
+    }
+  }
   render() {
     // console.log("this.props.viewer", this.props.viewer.articles);
     // console.log("this.state", this.state);
     const { viewer = {} } = this.props;
-    const { articles = {} } = viewer;
-    const { edges = [], pageInfo } = articles;
+    const { articles = {} } = viewer || {};
+    const { edges = [], pageInfo } = articles || {};
+    // console.log("this.props.relay", this.props);
     // console.log("edges-edges-edges-edges-edges- : ", JSON.stringify(edges));
     return (
       <FlatList
@@ -190,6 +201,7 @@ const PaginationContainer = createPaginationContainer(
   {
     viewer: graphql`
       fragment ArticlePagination_viewer on User {
+        id,
         articles(first: $count, after: $cursor, conditions:$conditions, sorters: $sorters) @connection(key: "ArticlePagination_articles"){
            pageInfo {
             startCursor,
@@ -202,7 +214,7 @@ const PaginationContainer = createPaginationContainer(
             node{
               id,
               key,
-              attachments,
+              attachments_wh(width:$width, height:$height, m: $m),
               submit,
               title,
               categories,
@@ -247,13 +259,15 @@ const PaginationContainer = createPaginationContainer(
         count,
         cursor,
         conditions: fragmentVariables.conditions,
-        sorters: fragmentVariables.sorters
+        sorters: fragmentVariables.sorters,
+        width: fragmentVariables.width,
+        height: fragmentVariables.height,
+        m: fragmentVariables.m
       };
     },
     query: graphql`
-    query ArticlePaginationRefetchQuery($count: Int, $cursor: String, $conditions: ArticleFilters, $sorters: [QuerySorter]) {
+    query ArticlePaginationRefetchQuery($count: Int, $cursor: String, $conditions: ArticleFilters, $sorters: [QuerySorter], $width: Int!, $height: Int!, $m:String) {
         viewer {
-          id,
             ...ArticlePagination_viewer
         }
     }`

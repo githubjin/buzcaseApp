@@ -72,7 +72,7 @@ export default class ArticleList extends Component {
       count: fragmentVariables.count
     });
     this.props.relay.refetch(refetchVariables, null, e => {
-      console.log("refresh error : ", e);
+      // console.log("refresh error : ", e);
       this.setState({
         refreshing: false
       });
@@ -81,7 +81,7 @@ export default class ArticleList extends Component {
   _loadMore_ = () => {
     // Increments the number of stories being rendered by 10.
     const refetchVariables = fragmentVariables => {
-      console.log("fragmentVariables", fragmentVariables);
+      // console.log("fragmentVariables", fragmentVariables);
       return {
         count: fragmentVariables.count + 10
       };
@@ -100,12 +100,12 @@ export default class ArticleList extends Component {
     }
     this.setState({ loadding: true });
     const refetchVariables = fragmentVariables => {
-      console.log("fragmentVariables : " + JSON.stringify(fragmentVariables));
+      // console.log("fragmentVariables : " + JSON.stringify(fragmentVariables));
       return { count: fragmentVariables.count + 10 * currentPage };
     };
     this.props.relay.refetch(refetchVariables, null, e => {
       this.setState({ loadding: false });
-      console.log("loadMore error:", e);
+      // console.log("loadMore error:", e);
     });
   };
   componentWillReceiveProps(nextProps: Object) {
@@ -136,18 +136,18 @@ export default class ArticleList extends Component {
     const { viewer: { articles } } = this.props;
     if (articles) {
       const { edges } = articles;
-      console.log(
-        "this.state.dataSource.concat(edges)",
-        this.state.dataSource.concat(edges)
-      );
+      // console.log(
+      //   "this.state.dataSource.concat(edges)",
+      //   this.state.dataSource.concat(edges)
+      // );
       this.setState({
         dataSource: this.state.dataSource.concat(edges)
       });
     }
   }
   render() {
-    console.log("this.props.viewer", this.props.viewer.articles);
-    console.log("this.state", this.state);
+    // console.log("this.props.viewer", this.props.viewer.articles);
+    // console.log("this.state", this.state);
     const { viewer = {} } = this.props;
     const { articles = {} } = viewer;
     const { edges = [], pageInfo } = articles;

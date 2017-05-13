@@ -7,7 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Button
+  Button,
+  Platform
 } from "react-native";
 const { graphql, QueryRenderer } = require("react-relay");
 import _ from "lodash/string";
@@ -40,7 +41,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: searchInputFontSize,
-    color: "#ffffff"
+    color: "#ffffff",
+    ...Platform.select({
+      android: {
+        height: normalize(40)
+      }
+    })
   },
   searchIcon: {
     paddingHorizontal: 5
@@ -146,7 +152,7 @@ export default class SearchContainer extends React.PureComponent {
           <Button
             onPress={this._clearSearchHistory}
             title="清空查询历史记录"
-            color="#841584"
+            color="rgba(231,76,60,1)"
           />
         </View>
       </ScrollView>

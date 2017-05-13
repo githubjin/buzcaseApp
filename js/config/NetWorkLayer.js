@@ -5,7 +5,9 @@ const {
 } = require("relay-runtime");
 import { API_URI } from "../constants";
 import { environment } from "./Environment";
+import { Alert } from "react-native";
 
+const datas = [];
 // token starts with 'Bearer '
 export function createNetworkLayer(token: string) {
   // Define a function that fetches the results of an operation (query/mutation/etc)
@@ -13,7 +15,7 @@ export function createNetworkLayer(token: string) {
   function fetchQuery(operation, variables, cacheConfig, uploadables) {
     // console.log("cacheConfigcacheConfig : " + JSON.stringify(cacheConfig));
     // console.log("operation", operation);
-    console.log("request variables : ", JSON.stringify(variables));
+    // console.log("request variables : ", JSON.stringify(variables));
     // if (cacheConfig && !cacheConfig.force) {
     //   let selector = createOperationSelector(operation, variables);
     //   console.log("selector : " + JSON.stringify(selector));
@@ -28,8 +30,8 @@ export function createNetworkLayer(token: string) {
       method: "POST",
       headers: {
         Accept: "application/json",
-        "content-type": "application/json"
-        // authorization: `Bearer ${token}`
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
         operationName: operation.name,
@@ -40,12 +42,14 @@ export function createNetworkLayer(token: string) {
       .then(response => {
         var result = response.json();
         // result.then(data => {
-        //   console.log("response data are" + JSON.stringify(data));
+        //   // console.log("response data are" + JSON.stringify(data));
+        //   datas.push(data);
+        //   Alert.alert("Alert", JSON.stringify(datas));
         // });
         return result;
       })
       .catch(error => {
-        console.log("fetch error : ", error);
+        // console.log("fetch error : ", error);
       });
   }
   // Create a network layer from the fetch function

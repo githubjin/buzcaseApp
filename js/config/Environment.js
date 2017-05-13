@@ -30,7 +30,7 @@ export const environment = {
 };
 
 function handlerProvider(handle) {
-  console.log("handlerProvider", handle);
+  // console.log("handlerProvider", handle);
   switch (handle) {
     case "connection":
       return ConnectionHandler;

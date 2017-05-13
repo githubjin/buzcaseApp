@@ -6,8 +6,10 @@ import {
   StyleSheet,
   Dimensions,
   PixelRatio,
-  TouchableWithoutFeedback
+  TouchableOpacity,
+  Alert
 } from "react-native";
+import { NavigationActions } from "react-navigation";
 import Icon from "react-native-vector-icons/Ionicons";
 import {
   Header,
@@ -20,13 +22,15 @@ import { background, navigatorBlue } from "../H8Colors";
 import { HeaderTitle, normalize } from "../H8Text";
 import { paddingHorizontal } from "../utils";
 import { dic_tab_font_size } from "../H8Size";
+import logout from "./mutation/logout";
 
 const styles = StyleSheet.create({
   item: {
     backgroundColor: "#ffffff",
     flexDirection: "row",
     justifyContent: "space-between",
-    height: normalize(30),
+    height: normalize(40),
+    paddingVertical: 10,
     alignItems: "center",
     width: Dimensions.get("window").width,
     paddingHorizontal
@@ -47,14 +51,13 @@ const styles = StyleSheet.create({
     borderTopColor: "#c9c9c9"
   },
   title: {
-    color: "#666666",
-    fontSize: dic_tab_font_size
+    color: "#333333"
   }
 });
 const Item = props => {
   const { title, style, onPress, icon } = props;
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <TouchableOpacity onPress={onPress}>
       <View style={[styles.item, style]}>
         <Text style={styles.title}>{title}</Text>
         <Icon
@@ -63,24 +66,59 @@ const Item = props => {
           size={normalize(20)}
         />
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 };
 export default class List extends React.Component {
   goDictionaryPage = () => {
     this.props.navigation.navigate("Dictionary");
   };
+  _logout = () => {
+    Alert.alert("提示", "确定退出吗？", [
+      { text: "否", onPress: () => {} },
+      {
+        text: "是",
+        onPress: () => {
+          logout(() => {
+            // this.props.navigation.navigate("SignIn");
+            this.props.navigation.dispatch({
+              type: NavigationActions.NAVIGATE,
+              routeName: "SignIn",
+              action: {
+                type: NavigationActions.RESET,
+                index: 0,
+                actions: [
+                  { type: NavigationActions.NAVIGATE, routeName: "SignIn" }
+                ]
+              }
+            });
+          });
+        }
+      }
+    ]);
+  };
   render() {
     return (
       <Container>
         <ScrollView style={styles.scrollContainer}>
-          <Item style={styles.group} title="草稿" />
+          <Item
+            style={styles.group}
+            title="草稿"
+            onPress={() => {
+              this.props.navigation.navigate("Drafts");
+            }}
+          />
           <Item
             onPress={this.goDictionaryPage}
             style={styles.group}
             title="字典项维护"
           />
-          <Item style={styles.group} title="退出" icon="ios-log-out" />
+          <Item
+            onPress={this._logout}
+            style={styles.group}
+            title="退出"
+            icon="ios-log-out"
+          />
         </ScrollView>
       </Container>
     );

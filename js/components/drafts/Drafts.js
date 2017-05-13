@@ -8,12 +8,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   PixelRatio,
-  Alert
+  Alert,
+  LayoutAnimation,
+  UIManager,
+  Platform
 } from "react-native";
 const { createPaginationContainer, graphql } = require("react-relay");
 import Icon from "react-native-vector-icons/Ionicons";
 import moment from "moment";
-import Swipeout from "react-native-swipeout";
+// import Swipeout from "react-native-swipeout";
 import { FooterComponent } from "../tabs/ArticlePagination";
 import { MetaText, ArticleTitle, Dot, ArticleContent, scale } from "../H8Text";
 import {
@@ -26,13 +29,28 @@ import {
 } from "../ArticleItem";
 import { commit } from "./DraftsDel";
 import { DELETE_CONFITM_TITLE, DELETE_CONFITM_CONTENT } from "../../constants";
+import { Button } from "../common";
+import { navigatorBlue } from "../H8Colors";
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1
+    flex: 1,
+    marginTop: 5
   },
   swip: {
-    marginBottom: 1
+    marginBottom: 5
+  },
+  button: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  buttonWrapper: {
+    width: "50%",
+    paddingVertical: 10
+  },
+  iconStyle: {
+    marginRight: 5
   }
 });
 
@@ -44,8 +62,22 @@ class Drafts extends React.PureComponent {
     super(props);
     this.state = {
       refreshing: false,
-      loadding: false
+      loadding: false,
+      filters: {}
     };
+  }
+  componentDidMount() {
+    const { filters } = this.props.navigation.state.params || {};
+    this._componentDidMount();
+    this.setState({
+      filters
+    });
+  }
+  _componentDidMount() {
+    if (Platform.OS === "android") {
+      UIManager.setLayoutAnimationEnabledExperimental &&
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
   }
   onRefresh = () => {
     this.setState({
@@ -69,7 +101,7 @@ class Drafts extends React.PureComponent {
     this.props.relay.loadMore(
       10, // Fetch the next 10 feed items
       e => {
-        console.log(e);
+        // console.log(e);
       }
     );
   };
@@ -80,7 +112,7 @@ class Drafts extends React.PureComponent {
     InteractionManager.runAfterInteractions(() => {
       this.props.relay.refetchConnection(10, e => {
         if (e) {
-          console.log("refresh error : ", e);
+          // console.log("refresh error : ", e);
         }
         this.setState({
           refreshing: false
@@ -93,7 +125,10 @@ class Drafts extends React.PureComponent {
   }
   edit = (id: string): (() => void) => {
     return () => {
-      this.props.navigation.navigate("Add", { id });
+      this.props.navigation.navigate("Add", {
+        id,
+        filters: this.state.filters
+      });
     };
   };
   getHomeplace(item) {
@@ -129,34 +164,15 @@ class Drafts extends React.PureComponent {
       }
     } = item;
     return (
-      <Swipeout
-        style={styles.swip}
-        right={[
-          {
-            text: "编辑",
-            onPress: this.edit(item.node.id),
-            backgroundColor: "rgba(0,168,84, 1)"
-          },
-          {
-            text: "删除",
-            onPress: this.deleteDraft(item.node.id, index + 1),
-            backgroundColor: "rgba(231,76,60,1)"
-          }
-        ]}
-      >
-        <Draft style={itemStyles.item}>
-          <MultiColRow>
-            <ArticleTitle>{name ? name : "无姓名"}</ArticleTitle>
-          </MultiColRow>
-          <SingleRow>
-            <ArticleTitle>{title ? title : "无标题"}</ArticleTitle>
-          </SingleRow>
-          <MultiColRow>
-            <MetaText />
-            <MetaText>{moment(createdAt).fromNow()}</MetaText>
-          </MultiColRow>
-        </Draft>
-      </Swipeout>
+      <DraftItem
+        id={id}
+        index={index}
+        name={name}
+        title={title}
+        createdAt={createdAt}
+        edit={this.edit}
+        deleteDraft={this.deleteDraft}
+      />
     );
   };
   render() {
@@ -182,6 +198,86 @@ class Drafts extends React.PureComponent {
           />
         )}
       />
+    );
+  }
+}
+
+class DraftItem extends React.PureComponent {
+  props: {
+    name: string,
+    title: string,
+    createdAt: number,
+    edit: (id: string) => () => void,
+    deleteDraft: (id: string) => () => void,
+    id: string,
+    index: number
+  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      buttonVisible: false
+    };
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      this.state.buttonVisible !== nextState.buttonVisible ||
+      this.props.name !== nextProps.name ||
+      this.props.title !== nextProps.title
+    );
+  }
+  componentWillUpdate() {
+    LayoutAnimation.spring();
+  }
+  render() {
+    const { name, title, createdAt, id, index } = this.props;
+    const { buttonVisible } = this.state;
+    return (
+      <View style={styles.swip}>
+        <TouchableOpacity
+          onPress={() => {
+            this.setState({ buttonVisible: !buttonVisible });
+          }}
+        >
+          <Draft style={itemStyles.item}>
+            <MultiColRow style={{ paddingTop: 5 }}>
+              <ArticleTitle>{name ? name : "无姓名"}</ArticleTitle>
+            </MultiColRow>
+            <SingleRow>
+              <ArticleTitle>{title ? title : "无标题"}</ArticleTitle>
+            </SingleRow>
+            <MultiColRow style={{ paddingBottom: 5 }}>
+              <MetaText />
+              <MetaText>{moment(createdAt).fromNow()}</MetaText>
+            </MultiColRow>
+          </Draft>
+        </TouchableOpacity>
+        {buttonVisible &&
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%"
+            }}
+          >
+            <Button
+              title="编辑"
+              style={[styles.buttonWrapper, { backgroundColor: navigatorBlue }]}
+              onPress={this.props.edit(id)}
+              icon="ios-create-outline"
+              buttonStyle={styles.button}
+              iconStyle={styles.iconStyle}
+              textStyle={{ color: "#ffffff" }}
+            />
+            <Button
+              title="删除"
+              iconStyle={styles.iconStyle}
+              style={[styles.buttonWrapper, { backgroundColor: "#999999" }]}
+              icon="ios-remove-circle-outline"
+              onPress={this.props.deleteDraft(id, index + 1)}
+              buttonStyle={styles.button}
+              textStyle={{ color: "#ffffff" }}
+            />
+          </View>}
+      </View>
     );
   }
 }

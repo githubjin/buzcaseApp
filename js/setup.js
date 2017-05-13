@@ -1,6 +1,12 @@
 // @flow
 import React, { PureComponent } from "react";
-import { Alert, Text } from "react-native";
+import {
+  Alert,
+  Text,
+  View,
+  TouchableOpacity,
+  InteractionManager
+} from "react-native";
 const {
   createFragmentContainer,
   graphql,
@@ -11,40 +17,65 @@ import AppNavigator from "./AppNavigator";
 import { environment } from "./config/Environment";
 import { getToken } from "./tokenUtil";
 import Loading from "./components/Loading";
-import { environment as RelayEnvironment } from "./config/Environment";
 
 export default class AppSetup extends PureComponent {
   state: {
-    loadding: boolean
+    loadding: boolean,
+    token?: string
   };
   constructor(props) {
     super(props);
     this.state = {
-      loadding: true
+      loadding: true,
+      mark: 0,
+      token: null
     };
   }
   componentDidMount() {
+    console.log(
+      "environment.current && environment.token",
+      !!(environment.current || environment.token),
+      this.state.loadding
+    );
     if (!environment.current || !environment.token) {
       getToken()
         .then(token => {
           environment.reset(token);
           this.setState({
-            loadding: false
+            loadding: false,
+            token: token
           });
         })
         .catch(error => {
           Alert.alert("提示", JSON.stringify(error));
         });
+    } else if (!!environment.current && !!environment.token) {
+      this.setState({ loadding: false, token: environment.token });
     }
+  }
+  reLoad = () => {
+    this.setState({
+      mark: this.state.mark + 1
+    });
+    InteractionManager.runAfterInteractions(() => {
+      this.componentDidMount();
+    });
+  };
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      this.state.loadding !== nextState.loadding ||
+      this.state.mark !== nextState.mark
+    );
   }
   render() {
     if (this.state.loadding) {
       return <Loading />;
     }
+    return <AppNavigator token={this.state.token} />;
     // console.log(error, props, rest);
-    return (
+    /*return (
       <QueryRenderer
-        environment={RelayEnvironment.current}
+        environment={environment.current}
         query={graphql`
             query setupQuery {
                 viewer {
@@ -55,14 +86,31 @@ export default class AppSetup extends PureComponent {
                   emailVerified,
                 }
             }`}
-        render={({ error, props, rest }) => {
-          if (props) {
-            return <AppNavigator viewer={props.viewer} />;
+        render={({ error, props, retry }) => {
+          if (error) {
+            return (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
+              >
+                <Text style={{ fontWeight: "500" }}>网络异常</Text>
+                <TouchableOpacity onPress={this.reLoad}>
+                  <View style={{ marginVertical: 10 }}><Text>重试</Text></View>
+                </TouchableOpacity>
+              </View>
+            );
           } else {
-            return <Loading />;
+            if (props) {
+              return <AppNavigator viewer={props.viewer} />;
+            } else {
+              return <Loading />;
+            }
           }
         }}
       />
-    );
+    );*/
   }
 }

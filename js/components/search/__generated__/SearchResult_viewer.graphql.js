@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule SearchResult_viewer.graphql
- * @generated SignedSource<<9a0e862b4fae8a09b6833a6c2b39e407>>
+ * @generated SignedSource<<9d6636de623c98c7d2e26288ee589639>>
  * @flow
  * @nogrep
  */
@@ -20,7 +20,6 @@ export type SearchResult_viewer_autocomplete_names = {
   article?: ?string;
   name?: ?string;
   title?: ?string;
-  highlight?: ?string;
   createdAt?: ?string;
 };
 
@@ -28,7 +27,6 @@ export type SearchResult_viewer_autocomplete_titles = {
   article?: ?string;
   name?: ?string;
   title?: ?string;
-  highlight?: ?string;
   createdAt?: ?string;
 };
 
@@ -121,13 +119,6 @@ const fragment /*: ConcreteFragment*/ = {
                   "kind": "ScalarField",
                   "alias": null,
                   "args": null,
-                  "name": "highlight",
-                  "storageKey": null
-                },
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "args": null,
                   "name": "createdAt",
                   "storageKey": null
                 }
@@ -161,13 +152,6 @@ const fragment /*: ConcreteFragment*/ = {
                   "alias": null,
                   "args": null,
                   "name": "title",
-                  "storageKey": null
-                },
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "args": null,
-                  "name": "highlight",
                   "storageKey": null
                 },
                 {

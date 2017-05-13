@@ -7,14 +7,20 @@ import {
   StyleSheet,
   Animated,
   TouchableOpacity,
-  InteractionManager
+  InteractionManager,
+  Platform,
+  StatusBar
 } from "react-native";
 import Immutable from "immutable";
 import { DictItemText, DictItemTitle, normalize } from "../H8Text";
 import { selected_red } from "../H8Colors";
 import styled from "styled-components/native";
 import Icon from "react-native-vector-icons/Ionicons";
-import { getMaskWidth, getMaskHeightDivTabbarHeight } from "./utils";
+import {
+  getMaskWidth,
+  getMaskHeightDivTabbarHeight,
+  getMaskHeight
+} from "./utils";
 import QuyuSub from "./QuyuSub";
 import QuyuProvince from "./QuyuProvince";
 import { getHeaderPadding } from "../utils";
@@ -28,7 +34,8 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 1002,
     width: getMaskWidth(),
-    height: getMaskHeightDivTabbarHeight(),
+    height: getMaskHeight() -
+      (Platform.OS === "ios" ? 0 : StatusBar.currentHeight),
     paddingTop: getHeaderPadding()
   },
   titleContainer: {
@@ -68,7 +75,8 @@ export default class Quyu extends React.PureComponent {
       province?: string,
       city?: string,
       area?: string
-    }) => void
+    }) => void,
+    resetSignal: number
   };
   constructor(props) {
     super(props);
@@ -95,6 +103,9 @@ export default class Quyu extends React.PureComponent {
         });
       }
     }
+    // else if (nextProps.resetSignal !== this.props.resetSignal) {
+    //   this.resetHomeplace(false);
+    // }
   }
   _loadSub = (type: string) => {
     return (code: string, name: string) => {
@@ -130,19 +141,21 @@ export default class Quyu extends React.PureComponent {
       right !== nr || provinceCode !== np || cityCode !== nc || loaded !== nl
     );
   }
-  resetHomeplace = () => {
+  resetHomeplace = (withQuery: boolean = true) => {
     let obj = {
       provinceCode: null,
       cityCode: null,
       areaCode: null
     };
     if (!this.state.homePlace.isEmpty()) {
-      obj.homePlace = Immutable.Map({});
+      obj.homePlace = this.state.homePlace.clear();
     }
     this.setState(obj);
-    InteractionManager.runAfterInteractions(() => {
-      this.props.filter({});
-    });
+    if (withQuery) {
+      InteractionManager.runAfterInteractions(() => {
+        this.props.filter({});
+      });
+    }
   };
   render() {
     const { back } = this.props;
@@ -185,7 +198,6 @@ export default class Quyu extends React.PureComponent {
               code={cityCode}
             />}
         </View>
-        <View style={{ height: 60 }} />
       </Animated.View>
     );
   }

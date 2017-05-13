@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import styled from "styled-components";
 import {
   Animated,
@@ -11,7 +11,8 @@ import {
   View,
   ScrollView,
   SectionList,
-  InteractionManager
+  InteractionManager,
+  StatusBar
 } from "react-native";
 import _ from "lodash";
 import { createFragmentContainer, graphql, QueryRenderer } from "react-relay";
@@ -21,8 +22,13 @@ import { DictItemText, normalize } from "../H8Text";
 import DictBox from "./DictBox";
 import QuyuBox from "./Quyu";
 import QuyuBoxTitle from "./QuyuTitle";
-import { getMaskWidth, getMaskHeightDivTabbarHeight } from "./utils";
+import {
+  getMaskWidth,
+  getMaskHeightDivTabbarHeight,
+  getMaskHeight
+} from "./utils";
 import { EmptyListLoading } from "../Loading";
+import { Button } from "../common";
 
 function getDimensions() {
   return Dimensions.get("window");
@@ -30,7 +36,8 @@ function getDimensions() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
-    height: getMaskHeightDivTabbarHeight(),
+    height: getMaskHeight() -
+      (Platform.OS === "ios" ? 0 : StatusBar.currentHeight),
     width: getMaskWidth(),
     zIndex: 1000,
     right: 0,
@@ -49,29 +56,31 @@ const VIEWABILITY_CONFIG = {
   waitForInteraction: true
 };
 
-class Filters extends Component {
+class Filters extends PureComponent {
   props: {
     isOpen: boolean,
-    doFilter: (key: string, value: string | string[]) => void
+    doFilter: (key: string, value: string | string[]) => void,
+    resetFilters: () => void
   };
   getRight() {
-    return -getMaskWidth();
+    return -(getMaskWidth() + 20);
   }
   constructor(props) {
     super(props);
     this.state = {
       anim: new Animated.Value(this.props.isOpen ? 0 : this.getRight()),
       quyuIsOpen: false,
-      homePlace: {}
+      homePlace: {},
+      resetSignal: 0
     };
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.isOpen !== this.props.isOpen) {
-      Animated.timing(this.state.anim, {
-        toValue: nextProps.isOpen ? 0 : this.getRight(),
-        duration: 200
-      }).start();
-    }
+    // if (nextProps.isOpen !== this.props.isOpen) {
+    //   Animated.timing(this.state.anim, {
+    //     toValue: nextProps.isOpen ? 0 : this.getRight(),
+    //     duration: 200
+    //   }).start();
+    // }
   }
   _filter = (fieldName: string) => {
     return (value: string | string[], multiple: boolean) => {
@@ -106,6 +115,7 @@ class Filters extends Component {
         filter={this._filter(item.fieldName)}
         title={item.title}
         edges={item.edges}
+        resetSignal={item.resetSignal}
         multiple={item.multiple}
       />
     );
@@ -115,17 +125,31 @@ class Filters extends Component {
       // console.log(
       //   pre.item.data[0].edges.length !== next.item.data[0].edges.length
       // );
-      return pre.item.data[0].edges.length !== next.item.data[0].edges.length;
+      return (
+        pre.item.data[0].edges.length !== next.item.data[0].edges.length ||
+        pre.item.data[0].resetSignal !== next.item.data[0].resetSignal
+      );
     }
     // console.log(pre.item.edges.length !== next.item.edges.length);
-    return pre.item.edges.length !== next.item.edges.length;
+    return (
+      pre.item.edges.length !== next.item.edges.length ||
+      pre.item.resetSignal !== next.item.resetSignal
+    );
   };
   shouldComponentUpdate(nextProps, nextState) {
     return (
       nextProps.viewer !== this.props.viewer ||
-      this.state.quyuIsOpen !== nextState.quyuIsOpen
+      this.state.quyuIsOpen !== nextState.quyuIsOpen ||
+      this.state.resetSignal !== nextState.resetSignal
     );
   }
+  resetFilters = () => {
+    this.props.resetFilters();
+    this.setState({
+      homePlace: null,
+      resetSignal: this.state.resetSignal + 1
+    });
+  };
   render() {
     // console.log("this.props.viewer", this.props.viewer);
     const {
@@ -136,7 +160,7 @@ class Filters extends Component {
       jobs = []
     } = this.props.viewer;
     return (
-      <Animated.View style={[styles.container, { right: this.state.anim }]}>
+      <View style={styles.container}>
         <QuyuBoxTitle
           showQuyu={this.toggleQuyu(true)}
           homePlace={this.state.homePlace}
@@ -145,6 +169,7 @@ class Filters extends Component {
           back={this.toggleQuyu(false)}
           filter={this.filterByHomeplace}
           isOpen={this.state.quyuIsOpen}
+          resetSignal={this.state.resetSignal}
         />
         <SectionList
           renderItem={this._renderDicBox}
@@ -153,6 +178,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  resetSignal: this.state.resetSignal,
                   type: "Gender",
                   fieldName: "gender",
                   edges: genders.edges,
@@ -165,6 +191,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  resetSignal: this.state.resetSignal,
                   fieldName: "categories",
                   type: "Category",
                   edges: categories.edges,
@@ -178,6 +205,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  resetSignal: this.state.resetSignal,
                   fieldName: "marriage",
                   type: "Marriage",
                   edges: marriages.edges,
@@ -190,6 +218,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  resetSignal: this.state.resetSignal,
                   fieldName: "education",
                   type: "Education",
                   edges: educations.edges,
@@ -202,6 +231,7 @@ class Filters extends Component {
             {
               data: [
                 {
+                  resetSignal: this.state.resetSignal,
                   fieldName: "jobs",
                   type: "Job",
                   edges: jobs.edges,
@@ -215,8 +245,22 @@ class Filters extends Component {
           ]}
           viewabilityConfig={VIEWABILITY_CONFIG}
         />
-        <View style={{ height: 60 }} />
-      </Animated.View>
+        <Button
+          onPress={this.resetFilters}
+          buttonStyle={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 10,
+            backgroundColor: "rgba(231,76,60,1)",
+            marginTop: 20
+          }}
+          iconStyle={{ marginRight: 10 }}
+          textStyle={{ color: "#ffffff" }}
+          title="重置"
+          icon="ios-trash-outline"
+        />
+      </View>
     );
   }
 }
@@ -272,7 +316,7 @@ const Container = createFragmentContainer(Filters, {
     }`
 });
 
-export default class FilterContainer extends Component {
+export default class FilterContainer extends PureComponent {
   shouldComponentUpdate(nextProps, nextState) {
     return this.props.isOpen !== nextProps.isOpen;
   }
@@ -294,7 +338,9 @@ export default class FilterContainer extends Component {
           if (props) {
             return <Container {...this.props} viewer={props.viewer} />;
           } else {
-            return <EmptyListLoading style={styles.container} />;
+            return Platform.OS === "ios"
+              ? <EmptyListLoading style={styles.container} />
+              : null;
           }
         }}
       />

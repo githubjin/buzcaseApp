@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule EditInit_article.graphql
- * @generated SignedSource<<2155000ae847f3eccc4cf3695bf2bf69>>
+ * @generated SignedSource<<fcaf95815e19316ca054b98d23961349>>
  * @flow
  * @nogrep
  */
@@ -15,6 +15,7 @@ import type {ConcreteFragment} from 'relay-runtime';
 export type EditInit_article = {
   id: string;
   attachments?: ?Array<?string>;
+  attachments_maxw?: ?Array<?string>;
   title?: ?string;
   categories?: ?Array<?string>;
   name?: ?string;
@@ -55,7 +56,13 @@ export type EditInit_article_events = {
 /* eslint-disable comma-dangle, quotes */
 
 const fragment /*: ConcreteFragment*/ = {
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "RootArgument",
+      "name": "width",
+      "type": "Int!"
+    }
+  ],
   "kind": "Fragment",
   "metadata": {
     "connection": [
@@ -72,35 +79,10 @@ const fragment /*: ConcreteFragment*/ = {
   "name": "EditInit_article",
   "selections": [
     {
-      "kind": "LinkedField",
+      "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "concreteType": "HomePlace",
-      "name": "homePlace",
-      "plural": false,
-      "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "province",
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "city",
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "area",
-          "storageKey": null
-        }
-      ],
+      "name": "birthday",
       "storageKey": null
     },
     {
@@ -108,6 +90,20 @@ const fragment /*: ConcreteFragment*/ = {
       "alias": null,
       "args": null,
       "name": "id",
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "width",
+          "variableName": "width",
+          "type": "Int!"
+        }
+      ],
+      "name": "attachments_maxw",
       "storageKey": null
     },
     {
@@ -149,14 +145,39 @@ const fragment /*: ConcreteFragment*/ = {
       "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "name": "birthday",
+      "name": "attachments",
       "storageKey": null
     },
     {
-      "kind": "ScalarField",
+      "kind": "LinkedField",
       "alias": null,
       "args": null,
-      "name": "attachments",
+      "concreteType": "HomePlace",
+      "name": "homePlace",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "province",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "city",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "area",
+          "storageKey": null
+        }
+      ],
       "storageKey": null
     },
     {

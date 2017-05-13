@@ -6,9 +6,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Keyboard,
   InteractionManager,
-  Dimensions
+  Dimensions,
+  Keyboard
 } from "react-native";
 import _ from "lodash/string";
 import { paddingHorizontal } from "../../utils";
@@ -103,12 +103,16 @@ export default class TextEditor extends React.PureComponent {
               maxLength={maxLength}
               value={this.state.value}
               multiline={multiline}
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+              }}
               style={[
                 styles.input,
                 multiline ? styles.inputMulti : styles.empty
               ]}
               placeholder={placeholder}
               underlineColorAndroid="transparent"
+              textAlignVertical="top"
             />
           </View>
           {!multiline &&

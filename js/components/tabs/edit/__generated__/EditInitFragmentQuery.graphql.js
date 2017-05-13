@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule EditInitFragmentQuery.graphql
- * @generated SignedSource<<5ec4ac051c52ed309e83fb617381f1d6>>
- * @relayHash 3f19b6aa9da09292e4b828546cbeefee
+ * @generated SignedSource<<c5c32baa1521883b03a0a2c4db3790fd>>
+ * @relayHash 41b252afd22053bb5ab60dd5e221af73
  * @flow
  * @nogrep
  */
@@ -22,10 +22,10 @@ import type {ConcreteBatch} from 'relay-runtime';
 query EditInitFragmentQuery(
   $articleId: ID!
   $include: Boolean!
+  $width: Int!
 ) {
   viewer {
     id
-    ...EditInit_viewer
   }
   article: node(id: $articleId) @include(if: $include) {
     __typename
@@ -34,20 +34,10 @@ query EditInitFragmentQuery(
   }
 }
 
-fragment EditInit_viewer on User {
-  id
-  ossToken {
-    Expiration
-    AccessKeyId
-    SecurityToken
-    AccessKeySecret
-    dir
-  }
-}
-
 fragment EditInit_article on Article {
   id
   attachments
+  attachments_maxw(width: $width)
   title
   categories
   name
@@ -99,6 +89,12 @@ const batch /*: ConcreteBatch*/ = {
         "name": "include",
         "type": "Boolean!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -119,11 +115,6 @@ const batch /*: ConcreteBatch*/ = {
             "args": null,
             "name": "id",
             "storageKey": null
-          },
-          {
-            "kind": "FragmentSpread",
-            "name": "EditInit_viewer",
-            "args": null
           }
         ],
         "storageKey": null
@@ -178,6 +169,12 @@ const batch /*: ConcreteBatch*/ = {
         "name": "include",
         "type": "Boolean!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
       }
     ],
     "kind": "Root",
@@ -197,52 +194,6 @@ const batch /*: ConcreteBatch*/ = {
             "alias": null,
             "args": null,
             "name": "id",
-            "storageKey": null
-          },
-          {
-            "kind": "LinkedField",
-            "alias": null,
-            "args": null,
-            "concreteType": "OSSToken",
-            "name": "ossToken",
-            "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "Expiration",
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "AccessKeyId",
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "SecurityToken",
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "AccessKeySecret",
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "dir",
-                "storageKey": null
-              }
-            ],
             "storageKey": null
           }
         ],
@@ -287,35 +238,24 @@ const batch /*: ConcreteBatch*/ = {
                 "type": "Article",
                 "selections": [
                   {
-                    "kind": "LinkedField",
+                    "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "concreteType": "HomePlace",
-                    "name": "homePlace",
-                    "plural": false,
-                    "selections": [
+                    "name": "birthday",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": [
                       {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "args": null,
-                        "name": "province",
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "args": null,
-                        "name": "city",
-                        "storageKey": null
-                      },
-                      {
-                        "kind": "ScalarField",
-                        "alias": null,
-                        "args": null,
-                        "name": "area",
-                        "storageKey": null
+                        "kind": "Variable",
+                        "name": "width",
+                        "variableName": "width",
+                        "type": "Int!"
                       }
                     ],
+                    "name": "attachments_maxw",
                     "storageKey": null
                   },
                   {
@@ -357,14 +297,39 @@ const batch /*: ConcreteBatch*/ = {
                     "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "name": "birthday",
+                    "name": "attachments",
                     "storageKey": null
                   },
                   {
-                    "kind": "ScalarField",
+                    "kind": "LinkedField",
                     "alias": null,
                     "args": null,
-                    "name": "attachments",
+                    "concreteType": "HomePlace",
+                    "name": "homePlace",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "province",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "city",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "area",
+                        "storageKey": null
+                      }
+                    ],
                     "storageKey": null
                   },
                   {
@@ -548,7 +513,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query EditInitFragmentQuery(\n  $articleId: ID!\n  $include: Boolean!\n) {\n  viewer {\n    id\n    ...EditInit_viewer\n  }\n  article: node(id: $articleId) @include(if: $include) {\n    __typename\n    ...EditInit_article\n    id\n  }\n}\n\nfragment EditInit_viewer on User {\n  id\n  ossToken {\n    Expiration\n    AccessKeyId\n    SecurityToken\n    AccessKeySecret\n    dir\n  }\n}\n\nfragment EditInit_article on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  createdAt\n  submit\n}\n"
+  "text": "query EditInitFragmentQuery(\n  $articleId: ID!\n  $include: Boolean!\n  $width: Int!\n) {\n  viewer {\n    id\n  }\n  article: node(id: $articleId) @include(if: $include) {\n    __typename\n    ...EditInit_article\n    id\n  }\n}\n\nfragment EditInit_article on Article {\n  id\n  attachments\n  attachments_maxw(width: $width)\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  createdAt\n  submit\n}\n"
 };
 
 module.exports = batch;

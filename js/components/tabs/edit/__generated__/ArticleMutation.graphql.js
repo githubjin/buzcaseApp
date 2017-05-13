@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule ArticleMutation.graphql
- * @generated SignedSource<<962131bad3e26f6bca5f3144424e196b>>
- * @relayHash 83ae5f7b86b19f9a16dc49b07852972b
+ * @generated SignedSource<<f6f7738cbf282e4ba2914d6b5190e85f>>
+ * @relayHash 21ada156901549dc55027adf7fe7d416
  * @flow
  * @nogrep
  */
@@ -59,7 +59,9 @@ export type ArticleMutationResponse_article_events = {
 
 export type ArticleMutationResponse_article = {
   id: string;
-  attachments?: ?Array<?string>;
+  attachments_wh_fill?: ?Array<?string>;
+  attachments_maxw?: ?Array<?string>;
+  attachments_wh_pad?: ?Array<?string>;
   title?: ?string;
   categories?: ?Array<?string>;
   name?: ?string;
@@ -101,22 +103,29 @@ export type ArticleMutationResponse_updatedEvents = {
 /*
 mutation ArticleMutation(
   $input: ArticleMutationInput!
+  $width: Int!
+  $height: Int!
+  $fullWidth: Int!
+  $fullHeight: Int!
+  $m: String!
 ) {
   saveArticle(input: $input) {
     article {
-      homePlace {
-        province
-        city
-        area
-      }
+      birthday
       id
+      attachments_maxw(width: $width)
+      attachments_wh_pad: attachments_wh(width: $fullWidth, height: $fullHeight, m: $m)
       title
       categories
       name
       education
       gender
-      birthday
-      attachments
+      attachments_wh_fill: attachments_wh(width: $width, height: $height, m: $m)
+      homePlace {
+        province
+        city
+        area
+      }
       jobs
       marriage
       children
@@ -168,6 +177,36 @@ const batch /*: ConcreteBatch*/ = {
         "name": "input",
         "type": "ArticleMutationInput!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "height",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullWidth",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullHeight",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String!",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -198,35 +237,10 @@ const batch /*: ConcreteBatch*/ = {
             "plural": false,
             "selections": [
               {
-                "kind": "LinkedField",
+                "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "concreteType": "HomePlace",
-                "name": "homePlace",
-                "plural": false,
-                "selections": [
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "province",
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "city",
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "area",
-                    "storageKey": null
-                  }
-                ],
+                "name": "birthday",
                 "storageKey": null
               },
               {
@@ -234,6 +248,46 @@ const batch /*: ConcreteBatch*/ = {
                 "alias": null,
                 "args": null,
                 "name": "id",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "width",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_maxw",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": "attachments_wh_pad",
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "height",
+                    "variableName": "fullHeight",
+                    "type": "Int!"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "m",
+                    "variableName": "m",
+                    "type": "String"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "fullWidth",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_wh",
                 "storageKey": null
               },
               {
@@ -273,16 +327,60 @@ const batch /*: ConcreteBatch*/ = {
               },
               {
                 "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "birthday",
+                "alias": "attachments_wh_fill",
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "height",
+                    "variableName": "height",
+                    "type": "Int!"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "m",
+                    "variableName": "m",
+                    "type": "String"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "width",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_wh",
                 "storageKey": null
               },
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
                 "args": null,
-                "name": "attachments",
+                "concreteType": "HomePlace",
+                "name": "homePlace",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "province",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "city",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "area",
+                    "storageKey": null
+                  }
+                ],
                 "storageKey": null
               },
               {
@@ -507,6 +605,36 @@ const batch /*: ConcreteBatch*/ = {
         "name": "input",
         "type": "ArticleMutationInput!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "height",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullWidth",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullHeight",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String!",
+        "defaultValue": null
       }
     ],
     "kind": "Root",
@@ -538,41 +666,75 @@ const batch /*: ConcreteBatch*/ = {
             "selections": [
               {
                 "kind": "ScalarField",
-                "alias": null,
-                "args": null,
-                "name": "attachments",
+                "alias": "attachments_wh_fill",
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "height",
+                    "variableName": "height",
+                    "type": "Int!"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "m",
+                    "variableName": "m",
+                    "type": "String"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "width",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_wh",
                 "storageKey": null
               },
               {
-                "kind": "LinkedField",
+                "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "concreteType": "HomePlace",
-                "name": "homePlace",
-                "plural": false,
-                "selections": [
+                "name": "birthday",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": [
                   {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "province",
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "city",
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "area",
-                    "storageKey": null
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "width",
+                    "type": "Int!"
                   }
                 ],
+                "name": "attachments_maxw",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": "attachments_wh_pad",
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "height",
+                    "variableName": "fullHeight",
+                    "type": "Int!"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "m",
+                    "variableName": "m",
+                    "type": "String"
+                  },
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "fullWidth",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_wh",
                 "storageKey": null
               },
               {
@@ -614,14 +776,39 @@ const batch /*: ConcreteBatch*/ = {
                 "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "name": "birthday",
+                "name": "id",
                 "storageKey": null
               },
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
                 "args": null,
-                "name": "id",
+                "concreteType": "HomePlace",
+                "name": "homePlace",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "province",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "city",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "area",
+                    "storageKey": null
+                  }
+                ],
                 "storageKey": null
               },
               {
@@ -897,7 +1084,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "mutation ArticleMutation(\n  $input: ArticleMutationInput!\n) {\n  saveArticle(input: $input) {\n    article {\n      homePlace {\n        province\n        city\n        area\n      }\n      id\n      title\n      categories\n      name\n      education\n      gender\n      birthday\n      attachments\n      jobs\n      marriage\n      children\n      events(first: 10) {\n        edges {\n          node {\n            id\n            text\n            createdAt\n            __typename\n          }\n          cursor\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n        }\n      }\n      knowledge\n      createdAt\n      submit\n    }\n    keys\n    newEvents {\n      cursor\n      node {\n        id\n        text\n      }\n    }\n    subEvents\n    updatedEvents {\n      node {\n        id\n        text\n      }\n    }\n  }\n}\n"
+  "text": "mutation ArticleMutation(\n  $input: ArticleMutationInput!\n  $width: Int!\n  $height: Int!\n  $fullWidth: Int!\n  $fullHeight: Int!\n  $m: String!\n) {\n  saveArticle(input: $input) {\n    article {\n      birthday\n      id\n      attachments_maxw(width: $width)\n      attachments_wh_pad: attachments_wh(width: $fullWidth, height: $fullHeight, m: $m)\n      title\n      categories\n      name\n      education\n      gender\n      attachments_wh_fill: attachments_wh(width: $width, height: $height, m: $m)\n      homePlace {\n        province\n        city\n        area\n      }\n      jobs\n      marriage\n      children\n      events(first: 10) {\n        edges {\n          node {\n            id\n            text\n            createdAt\n            __typename\n          }\n          cursor\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          hasPreviousPage\n          startCursor\n        }\n      }\n      knowledge\n      createdAt\n      submit\n    }\n    keys\n    newEvents {\n      cursor\n      node {\n        id\n        text\n      }\n    }\n    subEvents\n    updatedEvents {\n      node {\n        id\n        text\n      }\n    }\n  }\n}\n"
 };
 
 module.exports = batch;

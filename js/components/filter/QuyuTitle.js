@@ -31,9 +31,9 @@ export default class QuyuTitle extends PureComponent {
   render() {
     const { homePlace = {}, showQuyu } = this.props;
     let address =
-      (homePlace.province ? homePlace.province : "") +
-      (homePlace.city ? homePlace.city : "") +
-      (homePlace.area ? homePlace.area : "");
+      (homePlace && homePlace.province ? homePlace.province : "") +
+      (homePlace && homePlace.city ? homePlace.city : "") +
+      (homePlace && homePlace.area ? homePlace.area : "");
     return (
       <View style={styles.container}>
         <DictItemTitle>出生地点：</DictItemTitle>

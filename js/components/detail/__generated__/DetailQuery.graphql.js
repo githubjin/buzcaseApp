@@ -3,8 +3,8 @@
  *   relay-compiler
  *
  * @providesModule DetailQuery.graphql
- * @generated SignedSource<<bad4c7f959410396c894e1174451a38a>>
- * @relayHash 1cd3f7f0d70d580ecc4cdd04381eca76
+ * @generated SignedSource<<15f76f6c1dff11e46e752ad6404d74d4>>
+ * @relayHash 405b1c42cf55b6b60f2c3161bbcc2c23
  * @flow
  * @nogrep
  */
@@ -21,6 +21,10 @@ import type {ConcreteBatch} from 'relay-runtime';
 /*
 query DetailQuery(
   $articleId: ID!
+  $width: Int!
+  $fullHeight: Int!
+  $fullWidth: Int!
+  $m: String
 ) {
   node(id: $articleId) {
     __typename
@@ -31,7 +35,8 @@ query DetailQuery(
 
 fragment Detail_node on Article {
   id
-  attachments
+  attachments_maxw(width: $width)
+  attachments_wh(width: $fullWidth, height: $fullHeight, m: $m)
   title
   categories
   name
@@ -93,6 +98,30 @@ const batch /*: ConcreteBatch*/ = {
         "name": "articleId",
         "type": "ID!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullHeight",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullWidth",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -136,6 +165,30 @@ const batch /*: ConcreteBatch*/ = {
         "name": "articleId",
         "type": "ID!",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "width",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullHeight",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "fullWidth",
+        "type": "Int!",
+        "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "m",
+        "type": "String",
+        "defaultValue": null
       }
     ],
     "kind": "Root",
@@ -176,35 +229,36 @@ const batch /*: ConcreteBatch*/ = {
             "type": "Article",
             "selections": [
               {
-                "kind": "LinkedField",
+                "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "concreteType": "HomePlace",
-                "name": "homePlace",
-                "plural": false,
-                "selections": [
+                "name": "birthday",
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "args": [
                   {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "province",
-                    "storageKey": null
+                    "kind": "Variable",
+                    "name": "height",
+                    "variableName": "fullHeight",
+                    "type": "Int!"
                   },
                   {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "city",
-                    "storageKey": null
+                    "kind": "Variable",
+                    "name": "m",
+                    "variableName": "m",
+                    "type": "String"
                   },
                   {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "area",
-                    "storageKey": null
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "fullWidth",
+                    "type": "Int!"
                   }
                 ],
+                "name": "attachments_wh",
                 "storageKey": null
               },
               {
@@ -245,15 +299,47 @@ const batch /*: ConcreteBatch*/ = {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "args": null,
-                "name": "birthday",
+                "args": [
+                  {
+                    "kind": "Variable",
+                    "name": "width",
+                    "variableName": "width",
+                    "type": "Int!"
+                  }
+                ],
+                "name": "attachments_maxw",
                 "storageKey": null
               },
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
                 "args": null,
-                "name": "attachments",
+                "concreteType": "HomePlace",
+                "name": "homePlace",
+                "plural": false,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "province",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "city",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "area",
+                    "storageKey": null
+                  }
+                ],
                 "storageKey": null
               },
               {
@@ -558,7 +644,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query DetailQuery(\n  $articleId: ID!\n) {\n  node(id: $articleId) {\n    __typename\n    ...Detail_node\n    id\n  }\n}\n\nfragment Detail_node on Article {\n  id\n  attachments\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  notes(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  createdAt\n}\n"
+  "text": "query DetailQuery(\n  $articleId: ID!\n  $width: Int!\n  $fullHeight: Int!\n  $fullWidth: Int!\n  $m: String\n) {\n  node(id: $articleId) {\n    __typename\n    ...Detail_node\n    id\n  }\n}\n\nfragment Detail_node on Article {\n  id\n  attachments_maxw(width: $width)\n  attachments_wh(width: $fullWidth, height: $fullHeight, m: $m)\n  title\n  categories\n  name\n  education\n  gender\n  birthday\n  homePlace {\n    province\n    city\n    area\n  }\n  jobs\n  marriage\n  children\n  events(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  knowledge\n  notes(first: 10) {\n    edges {\n      node {\n        id\n        text\n        createdAt\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n  createdAt\n}\n"
 };
 
 module.exports = batch;

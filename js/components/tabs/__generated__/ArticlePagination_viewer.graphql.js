@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule ArticlePagination_viewer.graphql
- * @generated SignedSource<<f412af3a455943b0710264bf05292f46>>
+ * @generated SignedSource<<fb0dcb9b03ffcba176b7b4c463d56c5c>>
  * @flow
  * @nogrep
  */
@@ -13,6 +13,7 @@
 /*::
 import type {ConcreteFragment} from 'relay-runtime';
 export type ArticlePagination_viewer = {
+  id: string;
   articles?: ?ArticlePagination_viewer_articles;
 };
 
@@ -32,7 +33,7 @@ export type ArticlePagination_viewer_articles_edges_node_homePlace = {
 export type ArticlePagination_viewer_articles_edges_node = {
   id: string;
   key?: ?string;
-  attachments?: ?Array<?string>;
+  attachments_wh?: ?Array<?string>;
   submit?: ?boolean;
   title?: ?string;
   categories?: ?Array<?string>;
@@ -82,6 +83,21 @@ const fragment /*: ConcreteFragment*/ = {
       "kind": "RootArgument",
       "name": "sorters",
       "type": "[QuerySorter]"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "width",
+      "type": "Int!"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "height",
+      "type": "Int!"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "m",
+      "type": "String"
     }
   ],
   "kind": "Fragment",
@@ -99,6 +115,13 @@ const fragment /*: ConcreteFragment*/ = {
   },
   "name": "ArticlePagination_viewer",
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "args": null,
+      "name": "id",
+      "storageKey": null
+    },
     {
       "kind": "LinkedField",
       "alias": "articles",
@@ -199,8 +222,27 @@ const fragment /*: ConcreteFragment*/ = {
                 {
                   "kind": "ScalarField",
                   "alias": null,
-                  "args": null,
-                  "name": "attachments",
+                  "args": [
+                    {
+                      "kind": "Variable",
+                      "name": "height",
+                      "variableName": "height",
+                      "type": "Int!"
+                    },
+                    {
+                      "kind": "Variable",
+                      "name": "m",
+                      "variableName": "m",
+                      "type": "String"
+                    },
+                    {
+                      "kind": "Variable",
+                      "name": "width",
+                      "variableName": "width",
+                      "type": "Int!"
+                    }
+                  ],
+                  "name": "attachments_wh",
                   "storageKey": null
                 },
                 {

@@ -3,7 +3,7 @@
  *   relay-compiler
  *
  * @providesModule Detail_node.graphql
- * @generated SignedSource<<9832d97e4044bbae598feb363bb53576>>
+ * @generated SignedSource<<d8c312fe1ee30cec975591a65f930022>>
  * @flow
  * @nogrep
  */
@@ -14,7 +14,8 @@
 import type {ConcreteFragment} from 'relay-runtime';
 export type Detail_node = {
   id: string;
-  attachments?: ?Array<?string>;
+  attachments_maxw?: ?Array<?string>;
+  attachments_wh?: ?Array<?string>;
   title?: ?string;
   categories?: ?Array<?string>;
   name?: ?string;
@@ -69,7 +70,28 @@ export type Detail_node_notes = {
 /* eslint-disable comma-dangle, quotes */
 
 const fragment /*: ConcreteFragment*/ = {
-  "argumentDefinitions": [],
+  "argumentDefinitions": [
+    {
+      "kind": "RootArgument",
+      "name": "width",
+      "type": "Int!"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "fullWidth",
+      "type": "Int!"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "fullHeight",
+      "type": "Int!"
+    },
+    {
+      "kind": "RootArgument",
+      "name": "m",
+      "type": "String"
+    }
+  ],
   "kind": "Fragment",
   "metadata": {
     "connection": [
@@ -94,35 +116,10 @@ const fragment /*: ConcreteFragment*/ = {
   "name": "Detail_node",
   "selections": [
     {
-      "kind": "LinkedField",
+      "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "concreteType": "HomePlace",
-      "name": "homePlace",
-      "plural": false,
-      "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "province",
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "city",
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "args": null,
-          "name": "area",
-          "storageKey": null
-        }
-      ],
+      "name": "birthday",
       "storageKey": null
     },
     {
@@ -130,6 +127,32 @@ const fragment /*: ConcreteFragment*/ = {
       "alias": null,
       "args": null,
       "name": "id",
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "height",
+          "variableName": "fullHeight",
+          "type": "Int!"
+        },
+        {
+          "kind": "Variable",
+          "name": "m",
+          "variableName": "m",
+          "type": "String"
+        },
+        {
+          "kind": "Variable",
+          "name": "width",
+          "variableName": "fullWidth",
+          "type": "Int!"
+        }
+      ],
+      "name": "attachments_wh",
       "storageKey": null
     },
     {
@@ -170,15 +193,47 @@ const fragment /*: ConcreteFragment*/ = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "args": null,
-      "name": "birthday",
+      "args": [
+        {
+          "kind": "Variable",
+          "name": "width",
+          "variableName": "width",
+          "type": "Int!"
+        }
+      ],
+      "name": "attachments_maxw",
       "storageKey": null
     },
     {
-      "kind": "ScalarField",
+      "kind": "LinkedField",
       "alias": null,
       "args": null,
-      "name": "attachments",
+      "concreteType": "HomePlace",
+      "name": "homePlace",
+      "plural": false,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "province",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "city",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "area",
+          "storageKey": null
+        }
+      ],
       "storageKey": null
     },
     {

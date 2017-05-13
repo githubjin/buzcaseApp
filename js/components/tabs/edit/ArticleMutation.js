@@ -1,10 +1,15 @@
-// @flow
+/* @flow */
 import { commitMutation, graphql } from "react-relay";
 import { ConnectionHandler } from "relay-runtime";
-import { Alert } from "react-native";
+import { Alert, Dimensions } from "react-native";
 import _ from "lodash";
 import { getAddconfigs, getSubConfig, getOptimisticResponse } from "./config";
-import { ERROR_CONTENT, ERROR_TITLE } from "../../../constants";
+import {
+  ERROR_CONTENT,
+  ERROR_TITLE,
+  HOME_IMAGE_HEIGHT
+} from "../../../constants";
+import { paddingHorizontal } from "../../utils";
 
 type MutationInput = {
   id?: string,
@@ -21,19 +26,15 @@ type MutationInput = {
   eventValues?: string[],
   submit?: boolean
 };
-const delete_mutation = graphql`
-  mutation ArticleDeleteMutation($input: ArticleDeleteInput!) {
-        articlDel(input: $input) {
-          distroyedId
-        }
-      }
-`;
+
 const mutation = graphql`
-      mutation ArticleMutation($input: ArticleMutationInput!) {
+      mutation ArticleMutation($input: ArticleMutationInput!, $width: Int!, $height: Int!, $fullWidth: Int!, $fullHeight: Int!, $m: String!) {
         saveArticle(input: $input) {
           article {
             id,
-            attachments,
+            attachments_wh_fill: attachments_wh(width:$width, height:$height, m: $m),
+            attachments_maxw(width: $width),
+            attachments_wh_pad: attachments_wh(width:$fullWidth, height:$fullHeight, m: $m),
             title,
             categories,
             name,
@@ -79,7 +80,13 @@ const mutation = graphql`
         }
       }
     `;
-
+const imgArgs = {
+  width: Dimensions.get("window").width - 2 * paddingHorizontal,
+  height: HOME_IMAGE_HEIGHT,
+  fullHeight: Dimensions.get("window").height,
+  fullWidth: Dimensions.get("window").width,
+  m: "m_pad"
+};
 export function submit(
   environment,
   user,
@@ -90,30 +97,36 @@ export function submit(
   return commitMutation(environment, {
     mutation,
     variables: {
-      input
+      input,
+      ...imgArgs
     },
     updater: store => {
       // console.log(input.submit);
       const userProxy = store.get(user.id);
       const payload = store.getRootField("saveArticle");
       const article = payload.getLinkedRecord("article");
-      console.log(article.getValue("id"));
-      console.log(article.getLinkedRecord("events"));
-      console.log(article.getValue("name"));
-      console.log(article.getValue("title"));
+      // console.log(article.getValue("id"));
+      // console.log(article.getLinkedRecord("events"));
+      // console.log(article.getValue("name"));
+      // console.log(article.getValue("title"));
       const conn = ConnectionHandler.getConnection(
         userProxy,
         "ArticlePagination_articles",
         filters
       );
-      const edgeType = "ArticleEdge";
-      const newEdge = ConnectionHandler.createEdge(
-        store,
-        conn,
-        article,
-        edgeType
-      );
-      ConnectionHandler.insertEdgeBefore(conn, newEdge);
+      if (conn) {
+        const edgeType = "ArticleEdge";
+        const newEdge = ConnectionHandler.createEdge(
+          store,
+          conn,
+          article,
+          edgeType
+        );
+        // 加入案例列表
+        ConnectionHandler.insertEdgeBefore(conn, newEdge);
+      }
+      // 从草稿中删除
+      deleteFromDrafts(article.getValue("id"), userProxy);
     },
     onError: error => {
       console.log(error);
@@ -123,39 +136,24 @@ export function submit(
   });
 }
 
-export function _delete(
-  environment,
-  user,
-  input: MutationInput,
-  onCompleted,
-  filters
-) {
-  return commitMutation(environment, {
-    delete_mutation,
-    variables: {
-      input
+// 从草稿中删除
+function deleteFromDrafts(id: string, userProxy: Object): void {
+  const conn = ConnectionHandler.getConnection(userProxy, "Drafts_articles", {
+    conditions: {
+      submit: false
     },
-    onError: error => {
-      console.log(error);
-      Alert.alert(ERROR_TITLE, ERROR_CONTENT);
-    },
-    updater: store => {
-      // console.log(input.submit);
-      const userProxy = store.get(user.id);
-      const payload = store.getRootField("articlDel");
-      const distroyedId = payload.getValue("distroyedId");
-      const conn = ConnectionHandler.getConnection(
-        userProxy,
-        "ArticlePagination_articles",
-        filters
-      );
-      if (conn) {
-        ConnectionHandler.deleteNode(conn, distroyedId);
+    sorters: [
+      {
+        order: "createdAt",
+        dir: "DESC"
       }
-    },
-    onCompleted
+    ]
   });
+  if (conn) {
+    ConnectionHandler.deleteNode(conn, id);
+  }
 }
+
 export function commit(
   environment,
   user,
@@ -166,7 +164,8 @@ export function commit(
   return commitMutation(environment, {
     mutation,
     variables: {
-      input
+      input,
+      ...imgArgs
     },
     // updater: isNew && input.submit
     //   ? store => {

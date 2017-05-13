@@ -6,6 +6,7 @@ import {
   Platform,
   TouchableOpacity,
   Text
+  // Alert
 } from "react-native";
 import {
   StackNavigator,
@@ -16,7 +17,7 @@ import {
   addNavigationHelpers
 } from "react-navigation";
 import Ionicons from "react-native-vector-icons/Ionicons";
-const { createFragmentContainer, graphql } = require("react-relay");
+// const { createFragmentContainer, graphql } = require("react-relay");
 import Home from "./components/tabs/Home";
 import Add from "./components/tabs/edit/EditInit";
 import Setting from "./components/tabs/Setting";
@@ -45,15 +46,19 @@ const TabNav = TabNavigator(
     MainTab: {
       screen: Home,
       path: "/",
-      navigationOptions: {
-        tabBarLabel: "案例",
-        tabBarIcon: ({ tintColor, focused }) => (
-          <Ionicons
-            name={focused ? "ios-home" : "ios-home-outline"}
-            size={26}
-            style={{ color: tintColor }}
-          />
-        )
+      navigationOptions: ({ navigation }) => {
+        const { tabBarVisible = true } = navigation.state.params || {};
+        return {
+          tabBarLabel: "案例",
+          tabBarVisible: tabBarVisible,
+          tabBarIcon: ({ tintColor, focused }) => (
+            <Ionicons
+              name={focused ? "ios-home" : "ios-home-outline"}
+              size={26}
+              style={{ color: tintColor }}
+            />
+          )
+        };
       }
     },
     SettingsTab: {
@@ -62,6 +67,8 @@ const TabNav = TabNavigator(
       navigationOptions: {
         tabBarLabel: "更多",
         title: "更多",
+        headerBackTitle: null,
+        headerBackButton: null,
         tabBarIcon: ({ tintColor, focused }) => (
           <Ionicons
             name={focused ? "ios-list-box" : "ios-list-box-outline"}
@@ -79,7 +86,21 @@ const TabNav = TabNavigator(
     lazy: true,
     tabBarOptions: {
       showIcon: true,
-      showLabel: false
+      showLabel: false,
+      ...Platform.select({
+        android: {
+          // color: #e0e0e0;
+          // background-color: #2688f9;
+          activeTintColor: "#2688f9",
+          inactiveTintColor: "#666666",
+          indicatorStyle: {
+            backgroundColor: "transparent"
+          },
+          style: {
+            backgroundColor: "#f9f9f9"
+          }
+        }
+      })
     }
   }
 );
@@ -200,9 +221,20 @@ function getAppNavigator(initialRouteName: string) {
       },
       Drafts: {
         screen: Drafts,
-        navigationOptions: {
-          title: `草稿`,
-          headerBackTitle: null
+        navigationOptions: ({ navigation }) => {
+          return {
+            title: `草稿`,
+            headerBackTitle: null,
+            headerRight: (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate("Add");
+                }}
+              >
+                <Text style={{ color: "#666666", paddingRight: 12 }}>新建</Text>
+              </TouchableOpacity>
+            )
+          };
         }
       },
       QuyuSelector: {
@@ -246,13 +278,17 @@ function getAppNavigator(initialRouteName: string) {
       SignIn: {
         screen: SignIn,
         navigationOptions: {
-          title: "登录"
+          title: "登录",
+          header: null,
+          headerBackTitle: null
         }
       },
       SignUp: {
         screen: SignUp,
         navigationOptions: {
-          title: "注册"
+          title: "注册",
+          header: null,
+          headerBackTitle: null
         }
       }
     },
@@ -266,9 +302,10 @@ function getAppNavigator(initialRouteName: string) {
 // export default AppNavigator;
 export default class AppNavigator extends PureComponent {
   render() {
-    console.log("this.props.viewer", this.props.viewer);
-    const { viewer } = this.props;
-    var initialRouteName = viewer && viewer.sessionToken ? "Root" : "SignIn";
+    // console.log("this.props.viewer", this.props.viewer);
+    const { token } = this.props;
+    // Alert.alert("token", token);
+    var initialRouteName = token ? "Root" : "SignIn";
     const AppNav = getAppNavigator(initialRouteName);
     return <AppNav />;
   }

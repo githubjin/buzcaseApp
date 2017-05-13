@@ -7,6 +7,7 @@ import {
   TouchableOpacity
 } from "react-native";
 import _ from "lodash/lang";
+import _s from "lodash/string";
 import moment from "moment";
 import { SearchItemText, DictItemTitle, MetaText, normalize } from "../H8Text";
 import { caclateMarginHorizontal, paddingHorizontal } from "../utils";
@@ -29,8 +30,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    height: normalize(30),
-    alignItems: "center"
+    alignItems: "center",
+    paddingVertical: 5
   },
   itemAfter: {
     borderTopWidth: StyleSheet.hairlineWidth,
@@ -75,7 +76,9 @@ class Search extends React.Component {
       return (
         <TouchableOpacity onPress={this.showDetail(item.article)}>
           <View style={[styles.item, isFirstOne ? {} : styles.itemAfter]}>
-            <SearchItemText>{item[key]}</SearchItemText>
+            <SearchItemText>
+              {_s.truncate(item[key], { length: 20 })}
+            </SearchItemText>
             <MetaText>{moment(item.createdAt).fromNow()}</MetaText>
           </View>
         </TouchableOpacity>
@@ -128,14 +131,12 @@ const Container = createRefetchContainer(
             article
             name
             title
-            highlight
             createdAt
           }
           titles {
             article
             name
             title
-            highlight
             createdAt
           }
         }
